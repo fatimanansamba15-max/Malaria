@@ -12,6 +12,8 @@ from typing import List, Dict, Any
 
 app = FastAPI()
 
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,6 +21,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 👇 COPY AND PASTE THIS EXACT NEW ROUTE BLOCK 👇
+@app.get("/")
+def serve_frontend_dashboard():
+    import os
+    # Hunt down the HTML page whether it sits in root or fallback paths
+    for path in ["index.html", "../index.html"]:
+        if os.path.exists(path):
+            return FileResponse(path)
+    raise HTTPException(status_code=404, detail="Ecosystem mismatch: index.html missing from repository layout.")
+
 
 audit_history: List[Dict[str, Any]] = []
 
