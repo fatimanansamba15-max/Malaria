@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse  # <-- ADD THIS IMPORT LAYER
+
 from pydantic import BaseModel
 import pandas as pd
 import numpy as np
