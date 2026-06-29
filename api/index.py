@@ -1,17 +1,23 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse  # <-- ADD THIS IMPORT LAYER
-
-from pydantic import BaseModel
-import pandas as pd
-import numpy as np
+import os
 import requests
-from geopy.geocoders import Nominatim
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 
-app = FastAPI()
+# Core Data Science Tooling
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+from geopy.geocoders import Nominatim
 
+# Web Frameworks
+import streamlit as st
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+
+# ==========================================
+# 1. FASTAPI BACKEND ARCHITECTURE
+# ==========================================
 app = FastAPI()
 
 app.add_middleware(
@@ -22,10 +28,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 👇 COPY AND PASTE THIS EXACT NEW ROUTE BLOCK 👇
 @app.get("/")
 def serve_frontend_dashboard():
-    import os
     # Hunt down the HTML page whether it sits in root or fallback paths
     for path in ["index.html", "../index.html"]:
         if os.path.exists(path):
@@ -33,16 +37,15 @@ def serve_frontend_dashboard():
     raise HTTPException(status_code=404, detail="Ecosystem mismatch: index.html missing from repository layout.")
 
 
-
 # ==========================================
-# 1. PAGE CONFIGURATION & INJECTED STYLES
+# 2. STREAMLIT INTERFACE CONFIG & STYLES
 # ==========================================
 st.set_page_config(page_title="Malaria Outbreak Intelligence Engine", layout="wide", page_icon="🦟")
 
 # Premium CSS Injection for sleek visual design accents
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;600;700&display=swap');
         
         html, body, [class*="css"] {
             font-family: 'Inter', sans-serif;
@@ -124,7 +127,7 @@ if "last_queried_date" not in st.session_state:
     st.session_state.last_queried_date = ""
 
 # ==========================================
-# 2. LONG-RANGE CLIMATE PIPELINE ENGINE
+# 3. LONG-RANGE CLIMATE PIPELINE ENGINE
 # ==========================================
 def get_district_coordinates(location_string):
     geolocator = Nominatim(user_agent="malaria_premium_ui_2026")
@@ -173,7 +176,7 @@ def generate_target_climate_matrix(lat, lon, target_date):
                 'temp_mean': daily_data.get('temperature_2m_mean', [78.0]*total_days),
                 'humidity_mean': daily_data.get('relative_humidity_2m_mean', [65.0]*total_days),
                 'precipitation': daily_data.get('precipitation_sum', [0.1]*total_days)
-            }).fillna(method='ffill').fillna(method='bfill')
+            }).bfill().ffill()  # Fixed deprecated .fillna method chain
             
             return df_climate, float(elevation), "Live Weather Forecast API Streams"
         except Exception:
@@ -192,7 +195,7 @@ def generate_target_climate_matrix(lat, lon, target_date):
     return df_climate, float(base_elevation), "Historical Sub-Seasonal Climate Baselines"
 
 # ==========================================
-# 3. EMPIRICAL TIME-LAGGED MODEL ENGINE
+# 4. EMPIRICAL TIME-LAGGED MODEL ENGINE
 # ==========================================
 def calculate_predictive_horizon_risk(df_climate, elevation):
     timeline_records = []
@@ -250,7 +253,7 @@ def calculate_predictive_horizon_risk(df_climate, elevation):
     return pd.DataFrame(timeline_records)
 
 # ==========================================
-# 4. INTERFACE RUNTIME CONTROLLER
+# 5. INTERFACE RUNTIME CONTROLLER
 # ==========================================
 st.sidebar.markdown("""
     <div style="text-align: center; margin-bottom: 20px;">
@@ -308,7 +311,7 @@ if (st.session_state.malaria_results is None or
             st.sidebar.error("Location signature unverified. Adjust spelling and retry.")
 
 # ==========================================
-# 5. DASHBOARD PRESENTATION TAB LAYOUT
+# 6. DASHBOARD PRESENTATION TAB LAYOUT
 # ==========================================
 if st.session_state.malaria_results is not None:
     res = st.session_state.malaria_results
@@ -335,7 +338,6 @@ if st.session_state.malaria_results is not None:
     ])
 
     # ------------------ TAB 1: SITE MONITORING SUMMARY ------------------
-    # The warning trigger baseline has been re-indexed to 24.0% since raw scale is cut by half.
     with tab_summary:
         st.markdown(f"<p style='color:#64748b;'>Spatial Grid Pins: Latitude {res['lat']:.4f} | Longitude {res['lon']:.4f}</p>", unsafe_allow_html=True)
         
@@ -406,7 +408,7 @@ if st.session_state.malaria_results is not None:
 
         with rep_col1:
             st.markdown("### 📄 Long-Range Horizon Summary Report")
-            report_txt = f"""MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\nGenerated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n...\n"""
+            report_txt = f"MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\nGenerated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n...\n"
             st.download_button(label="📥 Download Long-Range Projection Summary (.txt)", data=report_txt, file_name=f"Malaria_LongRange_Report.txt", use_container_width=True)
 
         with rep_col2:
@@ -477,6 +479,3 @@ if st.session_state.malaria_results is not None:
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-
-
-
