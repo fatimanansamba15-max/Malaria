@@ -29,12 +29,8 @@
 
     <header class="mb-6 flex justify-between items-start">
         <div>
-            <h1 class="text-4xl font-bold tracking-tight text-slate-950">Malaria Early-warning Outbreak Intelligence Engine</h1>
-            <p class="text-slate-500 mt-2 text-base max-w-4xl">Predictive climate intelligence mapping sub-seasonal weather signals and long-range historical baselines to vector transmission horizons.</p>
-        </div>
-        <div class="flex items-center gap-4 text-slate-600 text-sm font-medium">
-            <span>Fork</span>
-            <svg class="w-5 h-5 cursor-pointer hover:text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <h1 class="text-2xl md:text-4xl font-bold tracking-tight text-slate-950">Malaria Early-warning Outbreak Intelligence Engine</h1>
+            <p class="text-slate-500 mt-2 text-sm max-w-4xl">Predictive climate intelligence mapping sub-seasonal weather signals and long-range historical baselines to vector transmission horizons.</p>
         </div>
     </header>
 
@@ -76,7 +72,7 @@
                     </select>
                 </div>
             </div>
-            <button onclick="runAnalysisPipeline()" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-800 transition shadow-sm cursor-pointer text-sm">
+            <button type="button" onclick="runAnalysisPipeline()" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-800 transition shadow-sm cursor-pointer text-sm text-center">
                 Run Model Pipeline
             </button>
         </div>
@@ -84,27 +80,27 @@
         <div class="lg:col-span-3 space-y-6">
             
             <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-px">
-                <button onclick="switchTab('summary')" id="tab-summary-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer active">👁️ Target Horizon Assessment</button>
-                <button onclick="switchTab('visuals')" id="tab-visuals-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">📊 Dynamic Trend Analytics</button>
-                <button onclick="switchTab('reports')" id="tab-reports-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">💾 Executive Report Hub</button>
-                <button onclick="switchTab('prevention')" id="tab-prevention-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">🛡️ Clinical & Vector Control Guide</button>
+                <button type="button" onclick="switchTab('summary')" id="tab-summary-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer active">👁️ Target Horizon Assessment</button>
+                <button type="button" onclick="switchTab('visuals')" id="tab-visuals-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">📊 Dynamic Trend Analytics</button>
+                <button type="button" onclick="switchTab('reports')" id="tab-reports-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">💾 Executive Report Hub</button>
+                <button type="button" onclick="switchTab('prevention')" id="tab-prevention-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">🛡️ Clinical & Vector Guide</button>
             </div>
 
             <div id="tab-summary" class="tab-content space-y-6">
                 <p id="geoPins" class="text-sm font-semibold text-slate-500">Spatial Grid Pins: Latitude 1.7879 | Longitude 33.5007</p>
                 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Expected Temperature</p><h2 id="mTemp" class="text-3xl font-bold text-slate-900">89.1 °F</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Relative Humidity</p><h2 id="mHumidity" class="text-3xl font-bold text-slate-900">88.8 %</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Estimated Seasonal Rain</p><h2 id="mRain" class="text-3xl font-bold text-slate-900">2.15 In</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Topographic Altitude</p><h2 id="mAlt" class="text-3xl font-bold text-slate-900">1173.181 m</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Expected Temperature</p><h2 id="mTemp" class="text-2xl font-bold text-slate-900">--</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Relative Humidity</p><h2 id="mHumidity" class="text-2xl font-bold text-slate-900">--</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Estimated Seasonal Rain</p><h2 id="mRain" class="text-2xl font-bold text-slate-900">--</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Topographic Altitude</p><h2 id="mAlt" class="text-2xl font-bold text-slate-900">--</h2></div>
                 </div>
 
                 <div class="space-y-3">
                     <h3 class="text-xl font-bold text-slate-900">Transmission Potential Assessment Summary</h3>
                     <div id="statusAlertBox" class="p-5 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900">
-                        <h4 class="font-bold text-lg">⚠️ EVALUATING ENVIRONMENTAL HORIZON MATRIX</h4>
-                        <p class="mt-1 text-sm">Please hit "Run Model Pipeline" to populate verified vector matching attributes for the selected targeting horizon windows.</p>
+                        <h4 class="font-bold text-lg">⚠️ INITIALIZING COMPONENT MATRIX</h4>
+                        <p class="mt-1 text-sm">Running automated framework sync. Click "Run Model Pipeline" if data isn't loaded.</p>
                     </div>
                 </div>
             </div>
@@ -112,7 +108,7 @@
             <div id="tab-visuals" class="tab-content space-y-6 hidden">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
                     <h3 class="text-base font-bold text-slate-800 mb-4">📊 Projected Risk Horizon Matrix Trend Curve</h3>
-                    <div class="h-72 w-full"><canvas id="horizonChart"></canvas></div>
+                    <div class="h-72 w-full relative"><canvas id="horizonChart"></canvas></div>
                 </div>
 
                 <div class="space-y-3">
@@ -141,12 +137,231 @@
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                         <h3 class="text-lg font-bold text-slate-900">📄 Long-Range Horizon Summary Report</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Compile structural algorithmic models, geo-position attributes, and vector affinity matching scores down into a structural plain text dossier report.</p>
-                        <button onclick="downloadReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-semibold shadow-xs cursor-pointer transition">
-                            📥 Download Long-Range Projection Summary (.txt)
+                        <button type="button" onclick="downloadReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-semibold shadow-xs cursor-pointer transition text-center">
+                            📥 Download Long-Range Summary (.txt)
                         </button>
                     </div>
 
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                         <h3 class="text-lg font-bold text-slate-900">🗃️ Session Search Audit Ledger Logs</h3>
                         <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-48 overflow-y-auto">
-                            <table class="w-full text-left text-xs border-collapse bg
+                            <table class="w-full text-left text-xs border-collapse bg-white">
+                                <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-2.5">Timestamp</th>
+                                        <th class="p-2.5">Target Hub</th>
+                                        <th class="p-2.5">Target Window</th>
+                                        <th class="p-2.5">Risk Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTableBody" class="divide-y divide-slate-100 text-slate-600">
+                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-prevention" class="tab-content grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+                <div class="space-y-4 md:col-span-2"><h3 class="text-xl font-bold text-slate-950 border-b pb-2.5">📋 Malaria Recognition & Preventative Environmental Deployment Guide</h3></div>
+                <div class="bg-amber-50/60 border-l-4 border-amber-500 p-5 rounded-r-xl space-y-2">
+                    <h4 class="text-amber-800 font-bold text-lg">🌡️ Uncomplicated Malaria (Early Signs)</h4>
+                    <ul class="list-disc pl-5 text-sm text-amber-950 space-y-1">
+                        <li><b>Cyclical Fevers:</b> Sudden high spikes with shivering.</li>
+                        <li><b>Profuse Sweating:</b> Heavy diaphoresis as fevers break.</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50/60 border-l-4 border-red-500 p-5 rounded-r-xl space-y-2">
+                    <h4 class="text-red-800 font-bold text-lg">🚨 Severe Malaria (Emergencies)</h4>
+                    <ul class="list-disc pl-5 text-sm text-red-950 space-y-1">
+                        <li><b>Cerebral Malaria:</b> Convulsions, confusion, delirium.</li>
+                        <li><b>Severe Anemia:</b> Extreme lethargy with respiratory distress.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Global State variables
+        window.chartInstance = null;
+        window.activeDataCache = null;
+        window.sessionLogs = [];
+
+        // Isolated Tab Switcher Function
+        function switchTab(tabId) {
+            try {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                
+                const selectedTab = document.getElementById(`tab-${tabId}`);
+                const selectedBtn = document.getElementById(`tab-${tabId}-btn`);
+                
+                if (selectedTab) selectedTab.classList.remove('hidden');
+                if (selectedBtn) selectedBtn.classList.add('active');
+            } catch (e) {
+                console.error("Tab Navigation Failure: ", e);
+            }
+        }
+
+        // Core API Data Fetch Processing Pipeline
+        async function runAnalysisPipeline() {
+            const districtField = document.getElementById('districtInput');
+            const monthField = document.getElementById('monthInput');
+            const yearField = document.getElementById('yearInput');
+
+            if (!districtField || !monthField || !yearField) return;
+
+            const district = districtField.value;
+            const month = parseInt(monthField.value);
+            const year = parseInt(yearField.value);
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthLabel = monthNames[month - 1] || "Selected Month";
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ district, year, month })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "Pipeline Execution Failed");
+
+                window.activeDataCache = data;
+
+                // Log Session Audit Items safely
+                window.sessionLogs.push({
+                    time: new Date().toLocaleTimeString(),
+                    target: district,
+                    window: `${monthLabel} ${year}`,
+                    risk_text: data.assessment.transmission_risk_status,
+                    risk_num: data.assessment.max_future_risk
+                });
+                updateAuditTableUI();
+
+                // UI Text Node Replacements
+                document.getElementById('verifiedAddress').innerText = data.location.address;
+                document.getElementById('dataSourceMode').innerText = data.metadata.data_source_mode;
+                document.getElementById('targetPeriodLabel').innerText = `${monthLabel} ${year}`;
+                document.getElementById('geoPins').innerText = `Spatial Grid Pins: Latitude ${data.location.lat.toFixed(4)} | Longitude ${data.location.lon.toFixed(4)}`;
+                
+                document.getElementById('mTemp').innerText = `${data.assessment.summary_metrics.Temperature} °F`;
+                document.getElementById('mHumidity').innerText = `${data.assessment.summary_metrics.Humidity} %`;
+                document.getElementById('mRain').innerText = `${data.assessment.summary_metrics.Accumulated_Rain.toFixed(2)} In`;
+                document.getElementById('mAlt').innerText = `${data.location.elevation.toFixed(3)} m`;
+
+                // Handle Banners Dependently
+                const alertBox = document.getElementById('statusAlertBox');
+                const maxRisk = data.assessment.max_future_risk;
+                const riskLevel = data.assessment.transmission_risk_status;
+
+                if (riskLevel.includes("HIGH")) {
+                    alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION WARNING (${riskLevel})</h4><p class="mt-1 text-sm">Long-range projections indicate that climate trends cross thresholds, reaching an active risk profile of <b>${maxRisk}% Vector Affinity Match</b>.</p>`;
+                } else {
+                    alertBox.className = "p-5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900";
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ CONTROLLED ECOSYSTEM PATHWAY (${riskLevel})</h4><p class="mt-1 text-sm">Projections state that climate boundaries remain safe containing vector loops successfully (<b>${maxRisk}% Max Index</b>).</p>`;
+                }
+
+                // Render Optional Layout Components Safely
+                buildLedgerTable(data.horizon_dataframe);
+                if (typeof Chart !== 'undefined') {
+                    renderHorizonChart(data.horizon_dataframe, riskLevel.includes("HIGH"));
+                }
+
+            } catch (err) {
+                console.error("Pipeline Runtime Exception", err);
+                const alertBox = document.getElementById('statusAlertBox');
+                if (alertBox) {
+                    alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">❌ Live Server Connectivity Issue</h4><p class="mt-1 text-sm">${err.message}. Please double check deployment sync logs.</p>`;
+                }
+            }
+        }
+
+        function buildLedgerTable(records) {
+            const tbody = document.getElementById('ledgerTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = records.map(r => `
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="p-3.5 font-semibold text-slate-800">${r.Date}</td>
+                    <td class="p-3.5">${r.Temperature}</td>
+                    <td class="p-3.5">${r.Humidity}</td>
+                    <td class="p-3.5">${r.Accumulated_Rain.toFixed(2)}</td>
+                    <td class="p-3.5 font-bold ${r.Risk_Status === 'HIGH' ? 'text-red-600':'text-emerald-600'}">
+                        ${r.Risk_Status} (${r.Outbreak_Risk_Percent}%)
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderHorizonChart(records, isCritical) {
+            const canvasElement = document.getElementById('horizonChart');
+            if (!canvasElement) return;
+            const ctx = canvasElement.getContext('2d');
+            
+            if (window.chartInstance) {
+                window.chartInstance.destroy();
+            }
+            
+            window.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: records.map(r => r.Date),
+                    datasets: [{
+                        label: 'Projected Outbreak Risk Index %',
+                        data: records.map(r => r.Outbreak_Risk_Percent),
+                        borderColor: isCritical ? '#dc2626' : '#059669',
+                        backgroundColor: 'transparent',
+                        tension: 0.2,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: isCritical ? '#dc2626' : '#059669',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 60 } }
+                }
+            });
+        }
+
+        function updateAuditTableUI() {
+            const tbody = document.getElementById('auditTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = window.sessionLogs.map(log => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2.5 font-medium text-slate-500">${log.time}</td>
+                    <td class="p-2.5 font-bold">${log.target}</td>
+                    <td class="p-2.5">${log.window}</td>
+                    <td class="p-2.5 font-extrabold ${log.risk_text.includes('HIGH') ? 'text-red-600':'text-emerald-600'}">${log.risk_text} (${log.risk_num}%)</td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        function downloadReport() {
+            if (!window.activeDataCache) return alert("Please execute a telemetry pipeline run first.");
+            const res = window.activeDataCache;
+            const summaryText = `MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\n==============================================\nTarget Site: ${res.location.address}\nTransmission Risk Status: ${res.assessment.transmission_risk_status}\nMax Projected Risk Index: ${res.assessment.max_future_risk}%\n==============================================`;
+            
+            const blob = new Blob([summaryText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Malaria_Outbreak_Report_${res.metadata.target_period}.txt`;
+            link.click();
+        }
+
+        // Secure Initialization Loop
+        document.addEventListener("DOMContentLoaded", () => {
+            switchTab('summary');
+            runAnalysisPipeline();
+        });
+    </script>
+</body>
+</html>
