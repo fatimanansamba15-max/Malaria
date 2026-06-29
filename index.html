@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malaria Outbreak Intelligence Engine</title>
+    <title>Malaria Early-warning Outbreak Intelligence Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -29,7 +29,7 @@
 
     <header class="mb-6 flex justify-between items-start">
         <div>
-            <h1 class="text-4xl font-bold tracking-tight text-slate-950">Intelligence Engine</h1>
+            <h1 class="text-4xl font-bold tracking-tight text-slate-950">Malaria Early-warning Outbreak Intelligence Engine</h1>
             <p class="text-slate-500 mt-2 text-base max-w-4xl">Predictive climate intelligence mapping sub-seasonal weather signals and long-range historical baselines to vector transmission horizons.</p>
         </div>
         <div class="flex items-center gap-4 text-slate-600 text-sm font-medium">
@@ -125,7 +125,7 @@
                                     <th class="p-3.5">Temperature (°F)</th>
                                     <th class="p-3.5">Humidity (%)</th>
                                     <th class="p-3.5">Accumulated Rain (In)</th>
-                                    <th class="p-3.5">Outbreak Risk Index %</th>
+                                    <th class="p-3.5">Outbreak Risk Level & Index %</th>
                                 </tr>
                             </thead>
                             <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-slate-700">
@@ -149,203 +149,4 @@
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                         <h3 class="text-lg font-bold text-slate-900">🗃️ Session Search Audit Ledger Logs</h3>
                         <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-48 overflow-y-auto">
-                            <table class="w-full text-left text-xs border-collapse bg-white">
-                                <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
-                                    <tr>
-                                        <th class="p-2.5">Timestamp</th>
-                                        <th class="p-2.5">Target Hub</th>
-                                        <th class="p-2.5">Target Window</th>
-                                        <th class="p-2.5">Peak Risk</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="auditTableBody" class="divide-y divide-slate-100 text-slate-600">
-                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-prevention" class="tab-content grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
-                <div class="space-y-4 md:col-span-2">
-                    <h3 class="text-xl font-bold text-slate-950 border-b pb-2.5">📋 Malaria Recognition & Preventative Environmental Deployment Guide</h3>
-                </div>
-                <div class="bg-amber-50/60 border-l-4 border-amber-500 p-5 rounded-r-xl space-y-2">
-                    <h4 class="text-amber-800 font-bold text-lg">🌡️ Uncomplicated Malaria (Early Signs)</h4>
-                    <p class="text-sm text-amber-900">Symptoms typically appear 10–15 days following transmission bites:</p>
-                    <ul class="list-disc pl-5 text-sm text-amber-950 space-y-1.5">
-                        <li><b>Cyclical Fevers:</b> Sudden high temperature spikes accompanied by intense shivering.</li>
-                        <li><b>Profuse Sweating Stages:</b> Heavy diaphoresis as fevers periodically break.</li>
-                        <li><b>Somatic Discomfort:</b> Severe headaches, muscle pain, nausea, and general systemic fatigue.</li>
-                    </ul>
-                </div>
-                <div class="bg-red-50/60 border-l-4 border-red-500 p-5 rounded-r-xl space-y-2">
-                    <h4 class="text-red-800 font-bold text-lg">🚨 Severe Malaria (Emergency Indicators)</h4>
-                    <p class="text-sm text-red-900 font-semibold">CRITICAL PROTOCOL: Seek immediate professional clinical attention if any signs present:</p>
-                    <ul class="list-disc pl-5 text-sm text-red-950 space-y-1.5">
-                        <li><b>Cerebral Malaria:</b> Convulsions, confusion, delirium, or loss of responsiveness.</li>
-                        <li><b>Severe Anemia:</b> Extreme lethargy coupled with laboured respiratory distress.</li>
-                        <li><b>Systemic Damage:</b> Jaundice (yellow eyes/skin) or an absolute inability to retain fluids.</li>
-                    </ul>
-                </div>
-                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-xs space-y-2">
-                    <h4 class="text-slate-900 font-bold text-base">🏠 Personal & Household Vector Interventions</h4>
-                    <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1.5">
-                        <li><b>Long-Lasting Insecticidal Nets (LLINs):</b> Sleep consistently under treated netting.</li>
-                        <li><b>Indoor Residual Spraying (IRS):</b> Periodically treat inner structural walls with approved formulas.</li>
-                        <li><b>Topical Blockers:</b> Apply insect repellents during peak vector activity horizons.</li>
-                    </ul>
-                </div>
-                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-xs space-y-2">
-                    <h4 class="text-slate-900 font-bold text-base">🚜 Structural Environmental Mitigation Options</h4>
-                    <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1.5">
-                        <li><b>Source Drainage Layouts:</b> Fill or drain surface puddles, open tracks, and breeding pits.</li>
-                        <li><b>Biological Mosquito Larviciding:</b> Introduce specific larvicide elements into static open waters.</li>
-                        <li><b>Clear Perimeter Growth:</b> Keep grass and brush short around residential perimeters.</li>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <script>
-        let chartInstance = null;
-        let activeDataCache = null;
-        let sessionLogs = [];
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}-btn`).classList.add('active');
-        }
-
-        async function runAnalysisPipeline() {
-            const district = document.getElementById('districtInput').value;
-            const month = parseInt(document.getElementById('monthInput').value);
-            const year = parseInt(document.getElementById('yearInput').value);
-            
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthLabel = monthNames[month - 1];
-
-            try {
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ district, year, month })
-                });
-                
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.detail || "Pipeline Failed");
-
-                activeDataCache = data;
-
-                // Record search into internal session tracking ledger
-                sessionLogs.push({
-                    time: new Date().toLocaleTimeString(),
-                    target: district,
-                    window: `${monthLabel} ${year}`,
-                    risk: data.assessment.max_future_risk
-                });
-                updateAuditTableUI();
-
-                // Hydrate Header Context Panels
-                document.getElementById('verifiedAddress').innerText = data.location.address;
-                document.getElementById('dataSourceMode').innerText = data.metadata.data_source_mode;
-                document.getElementById('targetPeriodLabel').innerText = `${monthLabel} ${year}`;
-                
-                // Hydrate Assessment Tab Values
-                document.getElementById('geoPins').innerText = `Spatial Grid Pins: Latitude ${data.location.lat.toFixed(4)} | Longitude ${data.location.lon.toFixed(4)}`;
-                document.getElementById('mTemp').innerText = `${data.assessment.summary_metrics.Temperature} °F`;
-                document.getElementById('mHumidity').innerText = `${data.assessment.summary_metrics.Humidity} %`;
-                document.getElementById('mRain').innerText = `${data.assessment.summary_metrics.Accumulated_Rain.toFixed(2)} In`;
-                document.getElementById('mAlt').innerText = `${data.location.elevation.toFixed(3)} m`;
-
-                // Handle warning banners dynamically depending on output calculations
-                const alertBox = document.getElementById('statusAlertBox');
-                const maxRisk = data.assessment.max_future_risk;
-                if (data.assessment.trigger_warning) {
-                    alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION WARNING</h4><p class="mt-1 text-sm">Long-range projections indicate that climate trends for <b>${monthLabel} ${year}</b> cross epidemiological thresholds, reaching an active risk profile of <b>${maxRisk}% Vector Affinity Match</b>.</p>`;
-                } else {
-                    alertBox.className = "p-5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ CONTROLLED ECOSYSTEM PATHWAY</h4><p class="mt-1 text-sm">Projections state that climate boundaries for <b>${monthLabel} ${year}</b> will remain safe, containing vector loops successfully (<b>${maxRisk}% Max Index</b>).</p>`;
-                }
-
-                // Render dynamic trend analytics elements
-                buildLedgerTable(data.horizon_dataframe);
-                renderHorizonChart(data.horizon_dataframe, data.assessment.trigger_warning);
-
-            } catch (err) {
-                alert(`Pipeline Runtime Issue: ${err.message}`);
-            }
-        }
-
-        function buildLedgerTable(records) {
-            const tbody = document.getElementById('ledgerTableBody');
-            tbody.innerHTML = records.map(r => `
-                <tr class="hover:bg-slate-50/80 transition">
-                    <td class="p-3.5 font-semibold text-slate-800">${r.Date}</td>
-                    <td class="p-3.5">${r.Temperature}</td>
-                    <td class="p-3.5">${r.Humidity}</td>
-                    <td class="p-3.5">${r.Accumulated_Rain.toFixed(2)}</td>
-                    <td class="p-3.5 font-bold ${r.Outbreak_Risk_Percent >= 24 ? 'text-red-600':'text-emerald-600'}">${r.Outbreak_Risk_Percent}%</td>
-                </tr>
-            `).join('');
-        }
-
-        function renderHorizonChart(records, isCritical) {
-            const ctx = document.getElementById('horizonChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-            
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: records.map(r => r.Date),
-                    datasets: [{
-                        label: 'Projected Outbreak Risk Index %',
-                        data: records.map(r => r.Outbreak_Risk_Percent),
-                        borderColor: isCritical ? '#dc2626' : '#059669',
-                        backgroundColor: 'rgba(255, 255, 255, 0)',
-                        tension: 0.2,
-                        borderWidth: 3,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: isCritical ? '#dc2626' : '#059669',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { min: 0, max: 60 } }
-                }
-            });
-        }
-
-        function updateAuditTableUI() {
-            const tbody = document.getElementById('auditTableBody');
-            tbody.innerHTML = sessionLogs.map(log => `
-                <tr class="hover:bg-slate-50"><td class="p-2.5 font-medium text-slate-500">${log.time}</td><td class="p-2.5 font-bold">${log.target}</td><td class="p-2.5">${log.window}</td><td class="p-2.5 font-extrabold text-slate-900">${log.risk}%</td></tr>
-            `).reverse().join('');
-        }
-
-        function downloadReport() {
-            if (!activeDataCache) return alert("Please execute a telemetry pipeline run first.");
-            const res = activeDataCache;
-            const summaryText = `MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\n==============================================\nGenerated On: ${new Date().toLocaleString()}\nTarget Site: ${res.location.address}\nLatitude/Longitude: ${res.location.lat} / ${res.location.lon}\nTopographic Elevation: ${res.location.elevation} m\nMax Projected Risk Index: ${res.assessment.max_future_risk}%\nPipeline Sourcing Profile: ${res.metadata.data_source_mode}\n==============================================`;
-            
-            const blob = new Blob([summaryText], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Malaria_Outbreak_Report_${res.metadata.target_period}.txt`;
-            link.click();
-        }
-
-        // Run automated initialization pipeline call on script startup
-        window.onload = () => { switchTab('summary'); runAnalysisPipeline(); };
-    </script>
-</body>
-</html>
+                            <table class="w-full text-left text-xs border-collapse bg
