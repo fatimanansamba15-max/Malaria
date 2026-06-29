@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malaria Early-warning Outbreak Intelligence Engine</title>
+    <title>Malaria Outbreak Intelligence Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #fafbfc; }
+        body { font-family: 'Inter', sans-serif; background-color: #fafbfc; transition: background-color 0.3s ease; }
         .metric-card {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(10px);
@@ -17,26 +17,73 @@
             box-shadow: 0 4px 16px rgba(31, 38, 135, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.18);
             text-align: center;
+            transition: all 0.3s ease;
         }
         .tab-btn.active {
             background-color: #1e293b !important;
             color: white !important;
             border-bottom: 3px solid #ef4444;
         }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+        .loading-skeleton {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
-<body class="p-6 max-w-7xl mx-auto text-slate-800">
+<body id="appBody" class="p-6 max-w-7xl mx-auto text-slate-800">
 
     <header class="mb-6 flex justify-between items-start">
         <div>
-            <h1 class="text-2xl md:text-4xl font-bold tracking-tight text-slate-950">Malaria Early-warning Outbreak Intelligence Engine</h1>
-            <p class="text-slate-500 mt-2 text-sm max-w-4xl">Predictive climate intelligence mapping sub-seasonal weather signals and long-range historical baselines to vector transmission horizons.</p>
+            <h1 class="text-4xl font-bold tracking-tight text-slate-950">Malaria Outbreak Intelligence Engine</h1>
+            <p class="text-slate-500 mt-2 text-base max-w-4xl">Predictive climate intelligence mapping sub-seasonal weather signals and long-range historical baselines to vector transmission horizons.</p>
         </div>
-        <div class="flex items-center gap-4 text-slate-600 text-sm font-medium">
-            <span>Fork</span>
-            <svg class="w-5 h-5 cursor-pointer hover:text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        <div class="flex items-center gap-5 text-slate-600 text-sm font-medium">
+            <button onclick="toggleSettingsPanel()" class="flex items-center gap-1.5 hover:text-black font-semibold cursor-pointer transition">
+                <svg class="w-5 h-5 animate-spin-hover" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Settings Menu</span>
+            </button>
+            <div class="flex items-center gap-1">
+                <span>Fork</span>
+                <svg class="w-5 h-5 cursor-pointer hover:text-black" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </div>
         </div>
     </header>
+
+    <div id="settingsPanel" class="hidden bg-slate-900 text-slate-100 p-6 rounded-2xl mb-6 shadow-xl border border-slate-800 space-y-4 transition-all">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div>
+                <h3 class="text-lg font-bold text-white">⚙️ Interface Feature Configuration Manager</h3>
+                <p class="text-xs text-slate-400">Toggle advanced engine processing layers and view parameters.</p>
+            </div>
+            <button onclick="toggleSettingsPanel()" class="text-slate-400 hover:text-white text-sm font-semibold cursor-pointer">✕ Close</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Visual Aesthetic Style</label>
+                <button onclick="toggleHighContrastTheme()" class="w-full text-left bg-slate-800 hover:bg-slate-700 p-3 rounded-xl text-sm font-medium transition cursor-pointer flex justify-between items-center">
+                    <span>Toggle Slate High Contrast</span>
+                    <span id="contrastIndicator" class="text-xs bg-slate-900 px-2 py-0.5 rounded text-amber-400 font-bold">OFF</span>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Extended Features</label>
+                <div class="flex items-center gap-3 bg-slate-800 p-3 rounded-xl text-sm">
+                    <input type="checkbox" id="extendedMetricsToggle" onchange="toggleExtendedMetrics()" class="w-4 h-4 cursor-pointer accent-blue-500">
+                    <label for="extendedMetricsToggle" class="cursor-pointer font-medium select-none">Show Rainfall Velocity Density</label>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Simulation Threshold overrides</label>
+                <select id="riskSensitivityOverride" class="w-full bg-slate-800 text-white p-2.5 rounded-xl border border-slate-700 text-sm focus:outline-none">
+                    <option value="standard">Standard Epidemiological Baseline</option>
+                    <option value="strict">Strict Vector Control Cutoff (+15%)</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
     <div id="addressBanner" class="bg-white border-l-4 border-blue-600 p-4 rounded-r-lg font-medium text-slate-700 mb-4 shadow-xs">
         📍 Verified Tracking Site: <span id="verifiedAddress" class="font-bold text-slate-950">Soroti, Eastern Region, Uganda</span>
@@ -76,35 +123,36 @@
                     </select>
                 </div>
             </div>
-            <button type="button" onclick="runAnalysisPipeline()" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-800 transition shadow-sm cursor-pointer text-sm text-center">
-                Run Model Pipeline
+            <button id="pipelineSubmitBtn" onclick="runAnalysisPipeline()" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-800 transition shadow-sm cursor-pointer text-sm flex justify-center items-center gap-2">
+                <span>Run Model Pipeline</span>
             </button>
         </div>
 
         <div class="lg:col-span-3 space-y-6">
             
             <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-px">
-                <button type="button" onclick="switchTab('summary')" id="tab-summary-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer active">👁️ Target Horizon Assessment</button>
-                <button type="button" onclick="switchTab('visuals')" id="tab-visuals-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">📊 Dynamic Trend Analytics</button>
-                <button type="button" onclick="switchTab('reports')" id="tab-reports-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">💾 Executive Report Hub</button>
-                <button type="button" onclick="switchTab('prevention')" id="tab-prevention-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">🛡️ Clinical & Vector Control Guide</button>
+                <button onclick="switchTab('summary')" id="tab-summary-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer active">👁️ Target Horizon Assessment</button>
+                <button onclick="switchTab('visuals')" id="tab-visuals-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">📊 Dynamic Trend Analytics</button>
+                <button onclick="switchTab('reports')" id="tab-reports-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">💾 Executive Report Hub</button>
+                <button onclick="switchTab('prevention')" id="tab-prevention-btn" class="tab-btn px-5 py-3 bg-slate-100 rounded-t-xl font-semibold text-sm text-slate-600 hover:bg-slate-200 transition cursor-pointer">🛡️ Clinical & Vector Control Guide</button>
             </div>
 
             <div id="tab-summary" class="tab-content space-y-6">
                 <p id="geoPins" class="text-sm font-semibold text-slate-500">Spatial Grid Pins: Latitude 1.7879 | Longitude 33.5007</p>
                 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Expected Temperature</p><h2 id="mTemp" class="text-3xl font-bold text-slate-900">--</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Relative Humidity</p><h2 id="mHumidity" class="text-3xl font-bold text-slate-900">--</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Estimated Seasonal Rain</p><h2 id="mRain" class="text-3xl font-bold text-slate-900">--</h2></div>
-                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Topographic Altitude</p><h2 id="mAlt" class="text-3xl font-bold text-slate-900">--</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Expected Temperature</p><h2 id="mTemp" class="text-3xl font-bold text-slate-900">89.1 °F</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Relative Humidity</p><h2 id="mHumidity" class="text-3xl font-bold text-slate-900">88.8 %</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Estimated Seasonal Rain</p><h2 id="mRain" class="text-3xl font-bold text-slate-900">2.15 In</h2></div>
+                    <div id="extendedVelocityCard" class="metric-card hidden bg-blue-50/50 border-blue-200"><p class="text-xs font-bold text-blue-500 tracking-wider mb-2 uppercase">Rainfall Velocity Density</p><h2 id="mVelocity" class="text-3xl font-bold text-blue-950">4.12 m/s</h2></div>
+                    <div class="metric-card"><p class="text-xs font-bold text-slate-400 tracking-wider mb-2 uppercase">Topographic Altitude</p><h2 id="mAlt" class="text-3xl font-bold text-slate-900">1173.181 m</h2></div>
                 </div>
 
                 <div class="space-y-3">
                     <h3 class="text-xl font-bold text-slate-900">Transmission Potential Assessment Summary</h3>
                     <div id="statusAlertBox" class="p-5 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900">
-                        <h4 class="font-bold text-lg">⚠️ READY FOR PIPELINE EXECUTION</h4>
-                        <p class="mt-1 text-sm">Click "Run Model Pipeline" to request framework attributes.</p>
+                        <h4 class="font-bold text-lg">⚠️ EVALUATING ENVIRONMENTAL HORIZON MATRIX</h4>
+                        <p class="mt-1 text-sm">Please hit "Run Model Pipeline" to populate verified vector matching attributes for the selected targeting horizon windows.</p>
                     </div>
                 </div>
             </div>
@@ -112,7 +160,7 @@
             <div id="tab-visuals" class="tab-content space-y-6 hidden">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
                     <h3 class="text-base font-bold text-slate-800 mb-4">📊 Projected Risk Horizon Matrix Trend Curve</h3>
-                    <div class="h-72 w-full relative"><canvas id="horizonChart"></canvas></div>
+                    <div class="h-72 w-full"><canvas id="horizonChart"></canvas></div>
                 </div>
 
                 <div class="space-y-3">
@@ -125,7 +173,7 @@
                                     <th class="p-3.5">Temperature (°F)</th>
                                     <th class="p-3.5">Humidity (%)</th>
                                     <th class="p-3.5">Accumulated Rain (In)</th>
-                                    <th class="p-3.5">Outbreak Risk Level & Index %</th>
+                                    <th class="p-3.5">Outbreak Risk Index %</th>
                                 </tr>
                             </thead>
                             <tbody id="ledgerTableBody" class="divide-y divide-slate-100 text-slate-700">
@@ -141,7 +189,7 @@
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
                         <h3 class="text-lg font-bold text-slate-900">📄 Long-Range Horizon Summary Report</h3>
                         <p class="text-sm text-slate-500 leading-relaxed">Compile structural algorithmic models, geo-position attributes, and vector affinity matching scores down into a structural plain text dossier report.</p>
-                        <button type="button" onclick="downloadReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-semibold shadow-xs cursor-pointer transition text-center">
+                        <button onclick="downloadReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-semibold shadow-xs cursor-pointer transition">
                             📥 Download Long-Range Projection Summary (.txt)
                         </button>
                     </div>
@@ -155,7 +203,7 @@
                                         <th class="p-2.5">Timestamp</th>
                                         <th class="p-2.5">Target Hub</th>
                                         <th class="p-2.5">Target Window</th>
-                                        <th class="p-2.5">Risk Status</th>
+                                        <th class="p-2.5">Peak Risk</th>
                                     </tr>
                                 </thead>
                                 <tbody id="auditTableBody" class="divide-y divide-slate-100 text-slate-600">
@@ -209,39 +257,64 @@
     </div>
 
     <script>
-        window.chartInstance = null;
-        window.activeDataCache = null;
-        window.sessionLogs = [];
+        let chartInstance = null;
+        let activeDataCache = null;
+        let sessionLogs = [];
 
         function switchTab(tabId) {
-            try {
-                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-                
-                const selectedTab = document.getElementById(`tab-${tabId}`);
-                const selectedBtn = document.getElementById(`tab-${tabId}-btn`);
-                
-                if (selectedTab) selectedTab.classList.remove('hidden');
-                if (selectedBtn) selectedBtn.classList.add('active');
-            } catch (e) {
-                console.error("Tab System Sync Mishap:", e);
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}-btn`).classList.add('active');
+        }
+
+        function toggleSettingsPanel() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function toggleHighContrastTheme() {
+            const body = document.getElementById('appBody');
+            const ind = document.getElementById('contrastIndicator');
+            if(body.style.backgroundColor === 'rgb(241, 245, 249)') {
+                body.style.backgroundColor = '#fafbfc';
+                ind.innerText = "OFF";
+                ind.className = "text-xs bg-slate-900 px-2 py-0.5 rounded text-amber-400 font-bold";
+            } else {
+                body.style.backgroundColor = '#f1f5f9';
+                ind.innerText = "ON";
+                ind.className = "text-xs bg-emerald-900 px-2 py-0.5 rounded text-emerald-400 font-bold";
             }
         }
 
+        function toggleExtendedMetrics() {
+            const card = document.getElementById('extendedVelocityCard');
+            card.classList.toggle('hidden');
+        }
+
         async function runAnalysisPipeline() {
-            const districtField = document.getElementById('districtInput');
-            const monthField = document.getElementById('monthInput');
-            const yearField = document.getElementById('yearInput');
-            const alertBox = document.getElementById('statusAlertBox');
-
-            if (!districtField || !monthField || !yearField) return;
-
-            const district = districtField.value;
-            const month = parseInt(monthField.value);
-            const year = parseInt(yearField.value);
+            const district = document.getElementById('districtInput').value;
+            const month = parseInt(document.getElementById('monthInput').value);
+            const year = parseInt(document.getElementById('yearInput').value);
             
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthLabel = monthNames[month - 1] || "Target Window";
+            const monthLabel = monthNames[month - 1];
+
+            // Trigger Loading Visual States
+            const btn = document.getElementById('pipelineSubmitBtn');
+            const alertBox = document.getElementById('statusAlertBox');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25"></circle><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Processing Matrices...</span>`;
+            
+            document.getElementById('mTemp').className = "text-3xl font-bold text-slate-300 loading-skeleton";
+            document.getElementById('mHumidity').className = "text-3xl font-bold text-slate-300 loading-skeleton";
+            document.getElementById('mRain').className = "text-3xl font-bold text-slate-300 loading-skeleton";
+            document.getElementById('mAlt').className = "text-3xl font-bold text-slate-300 loading-skeleton";
+
+            alertBox.className = "p-5 rounded-2xl border bg-slate-100 border-slate-300 text-slate-600 loading-skeleton";
+            alertBox.innerHTML = `<h4 class="font-bold text-lg">⚡ SYNCHRONIZING WITH SUB-SEASONAL HORIZON PIPELINE</h4><p class="mt-1 text-sm">Extracting satellite tracking maps and localized computational indicators...</p>`;
 
             try {
                 const response = await fetch('/api/analyze', {
@@ -251,84 +324,83 @@
                 });
                 
                 const data = await response.json();
-                
-                // Safety Guard Shield for 500 error scenarios
-                if (!response.ok || !data || !data.assessment) {
-                    throw new Error(data.detail || `Server exception code: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(data.detail || "Pipeline Failed");
 
-                window.activeDataCache = data;
+                activeDataCache = data;
 
-                // Record transaction into audit logs
-                window.sessionLogs.push({
+                // Record search into internal session tracking ledger
+                sessionLogs.push({
                     time: new Date().toLocaleTimeString(),
                     target: district,
                     window: `${monthLabel} ${year}`,
-                    risk_text: data.assessment.transmission_risk_status || "UNKNOWN RISK",
-                    risk_num: data.assessment.max_future_risk || 0
+                    risk: data.assessment.max_future_risk
                 });
                 updateAuditTableUI();
 
-                // Hydrate Content Elements
-                document.getElementById('verifiedAddress').innerText = data.location.address || district;
-                document.getElementById('dataSourceMode').innerText = data.metadata.data_source_mode || "Baseline Stream";
+                // Hydrate Header Context Panels
+                document.getElementById('verifiedAddress').innerText = data.location.address;
+                document.getElementById('dataSourceMode').innerText = data.metadata.data_source_mode;
                 document.getElementById('targetPeriodLabel').innerText = `${monthLabel} ${year}`;
+                
+                // Remove loading layouts and hydrate values
                 document.getElementById('geoPins').innerText = `Spatial Grid Pins: Latitude ${data.location.lat.toFixed(4)} | Longitude ${data.location.lon.toFixed(4)}`;
                 
+                document.getElementById('mTemp').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mTemp').innerText = `${data.assessment.summary_metrics.Temperature} °F`;
+                
+                document.getElementById('mHumidity').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mHumidity').innerText = `${data.assessment.summary_metrics.Humidity} %`;
+                
+                document.getElementById('mRain').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mRain').innerText = `${data.assessment.summary_metrics.Accumulated_Rain.toFixed(2)} In`;
+                
+                document.getElementById('mAlt').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mAlt').innerText = `${data.location.elevation.toFixed(3)} m`;
 
+                // Handle warning banners dynamically depending on output calculations
                 const maxRisk = data.assessment.max_future_risk;
-                const riskLevel = data.assessment.transmission_risk_status || "LOW TRANSMISSION RISK";
-
-                if (riskLevel.includes("HIGH")) {
+                alertBox.classList.remove('loading-skeleton');
+                if (data.assessment.trigger_warning) {
                     alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION WARNING (${riskLevel})</h4><p class="mt-1 text-sm">Long-range projections indicate that climate trends cross thresholds, reaching an active risk profile of <b>${maxRisk}% Vector Affinity Match</b>.</p>`;
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION WARNING</h4><p class="mt-1 text-sm">Long-range projections indicate that climate trends for <b>${monthLabel} ${year}</b> cross epidemiological thresholds, reaching an active risk profile of <b>${maxRisk}% Vector Affinity Match</b>.</p>`;
                 } else {
                     alertBox.className = "p-5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ CONTROLLED ECOSYSTEM PATHWAY (${riskLevel})</h4><p class="mt-1 text-sm">Projections state that climate boundaries remain safe, containing vector loops successfully (<b>${maxRisk}% Max Index</b>).</p>`;
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ CONTROLLED ECOSYSTEM PATHWAY</h4><p class="mt-1 text-sm">Projections state that climate boundaries for <b>${monthLabel} ${year}</b> will remain safe, containing vector loops successfully (<b>${maxRisk}% Max Index</b>).</p>`;
                 }
 
+                // Render dynamic trend analytics elements
                 buildLedgerTable(data.horizon_dataframe);
-                if (typeof Chart !== 'undefined') {
-                    renderHorizonChart(data.horizon_dataframe, riskLevel.includes("HIGH"));
-                }
+                renderHorizonChart(data.horizon_dataframe, data.assessment.trigger_warning);
 
             } catch (err) {
-                console.error("Pipeline Breakdown:", err);
-                if (alertBox) {
-                    alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">❌ Server Integration Gateway Offline</h4><p class="mt-1 text-sm">Failed to extract target timeline parameters: <b>${err.message}</b>. Please ensure your Vercel functions are fully deployed.</p>`;
-                }
+                alertBox.classList.remove('loading-skeleton');
+                alertBox.className = "p-5 rounded-2xl border bg-red-100 border-red-300 text-red-900";
+                alertBox.innerHTML = `<h4 class="font-bold text-lg">❌ Pipeline Execution Timeout</h4><p class="mt-1 text-sm">${err.message}</p>`;
+            } finally {
+                // Reset Button State
+                btn.disabled = false;
+                btn.innerHTML = `<span>Run Model Pipeline</span>`;
             }
         }
 
         function buildLedgerTable(records) {
             const tbody = document.getElementById('ledgerTableBody');
-            if (!tbody || !records) return;
             tbody.innerHTML = records.map(r => `
                 <tr class="hover:bg-slate-50/80 transition">
                     <td class="p-3.5 font-semibold text-slate-800">${r.Date}</td>
                     <td class="p-3.5">${r.Temperature}</td>
                     <td class="p-3.5">${r.Humidity}</td>
                     <td class="p-3.5">${r.Accumulated_Rain.toFixed(2)}</td>
-                    <td class="p-3.5 font-bold ${r.Risk_Status === 'HIGH' ? 'text-red-600':'text-emerald-600'}">
-                        ${r.Risk_Status} (${r.Outbreak_Risk_Percent}%)
-                    </td>
+                    <td class="p-3.5 font-bold ${r.Outbreak_Risk_Percent >= 24 ? 'text-red-600':'text-emerald-600'}">${r.Outbreak_Risk_Percent}%</td>
                 </tr>
             `).join('');
         }
 
         function renderHorizonChart(records, isCritical) {
-            const canvasElement = document.getElementById('horizonChart');
-            if (!canvasElement) return;
-            const ctx = canvasElement.getContext('2d');
+            const ctx = document.getElementById('horizonChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
             
-            if (window.chartInstance) window.chartInstance.destroy();
-            
-            window.chartInstance = new Chart(ctx, {
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: records.map(r => r.Date),
@@ -336,7 +408,7 @@
                         label: 'Projected Outbreak Risk Index %',
                         data: records.map(r => r.Outbreak_Risk_Percent),
                         borderColor: isCritical ? '#dc2626' : '#059669',
-                        backgroundColor: 'transparent',
+                        backgroundColor: 'rgba(255, 255, 255, 0)',
                         tension: 0.2,
                         borderWidth: 3,
                         pointBackgroundColor: '#ffffff',
@@ -354,21 +426,15 @@
 
         function updateAuditTableUI() {
             const tbody = document.getElementById('auditTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = window.sessionLogs.map(log => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-2.5 font-medium text-slate-500">${log.time}</td>
-                    <td class="p-2.5 font-bold">${log.target}</td>
-                    <td class="p-2.5">${log.window}</td>
-                    <td class="p-2.5 font-extrabold ${log.risk_text.includes('HIGH') ? 'text-red-600':'text-emerald-600'}">${log.risk_text} (${log.risk_num}%)</td>
-                </tr>
+            tbody.innerHTML = sessionLogs.map(log => `
+                <tr class="hover:bg-slate-50"><td class="p-2.5 font-medium text-slate-500">${log.time}</td><td class="p-2.5 font-bold">${log.target}</td><td class="p-2.5">${log.window}</td><td class="p-2.5 font-extrabold text-slate-900">${log.risk}%</td></tr>
             `).reverse().join('');
         }
 
         function downloadReport() {
-            if (!window.activeDataCache) return alert("Please execute a telemetry pipeline run first.");
-            const res = window.activeDataCache;
-            const summaryText = `MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\n==============================================\nGenerated On: ${new Date().toLocaleString()}\nTarget Site: ${res.location.address}\nTransmission Risk Status: ${res.assessment.transmission_risk_status}\nMax Projected Risk Index: ${res.assessment.max_future_risk}%\n==============================================`;
+            if (!activeDataCache) return alert("Please execute a telemetry pipeline run first.");
+            const res = activeDataCache;
+            const summaryText = `MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\n==============================================\nGenerated On: ${new Date().toLocaleString()}\nTarget Site: ${res.location.address}\nLatitude/Longitude: ${res.location.lat} / ${res.location.lon}\nTopographic Elevation: ${res.location.elevation} m\nMax Projected Risk Index: ${res.assessment.max_future_risk}%\nPipeline Sourcing Profile: ${res.metadata.data_source_mode}\n==============================================`;
             
             const blob = new Blob([summaryText], { type: 'text/plain' });
             const link = document.createElement('a');
@@ -377,10 +443,7 @@
             link.click();
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            switchTab('summary');
-            runAnalysisPipeline();
-        });
+        window.onload = () => { switchTab('summary'); runAnalysisPipeline(); };
     </script>
 </body>
 </html>
