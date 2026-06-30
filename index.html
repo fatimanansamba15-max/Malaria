@@ -42,7 +42,7 @@
         </div>
         <div class="flex items-center gap-5 text-slate-600 text-sm font-medium">
             <button onclick="toggleSettingsPanel()" class="flex items-center gap-1.5 hover:text-black font-semibold cursor-pointer transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 <span>Settings Control Panel</span>
             </button>
             <div class="flex items-center gap-1">
@@ -56,10 +56,11 @@
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
             <div>
                 <h3 class="text-lg font-bold text-white">⚙️ Interface Feature Configuration Manager</h3>
-                <p class="text-xs text-slate-400">Toggle advanced engine processing layers, notification rules, and boundary thresholds.</p>
+                <p class="text-xs text-slate-400">Toggle advanced engine processing layers, notification rules, boundaries, and quick reset parameters.</p>
             </div>
             <button onclick="toggleSettingsPanel()" class="text-slate-400 hover:text-white text-sm font-semibold cursor-pointer">✕ Close</button>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="space-y-2">
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Visual Aesthetic Style</label>
@@ -85,11 +86,26 @@
             <div class="space-y-2">
                 <div class="flex justify-between items-center">
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Outbreak Alert Threshold</label>
-                    <span id="thresholdBadge" class="text-xs bg-red-950 text-red-400 font-bold px-2 py-0.5 rounded border border-red-900">25%</span>
+                    <span id="thresholdBadge" class="text-xs bg-red-950 text-red-400 font-bold px-2 py-0.5 rounded border border-red-900">60%</span>
                 </div>
                 <div class="pt-2">
-                    <input type="range" id="outbreakRiskSlider" min="10" max="50" value="25" oninput="updateSliderThresholdValue(this.value)" onchange="runAnalysisPipeline()" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500">
+                    <input type="range" id="outbreakRiskSlider" min="10" max="90" value="60" oninput="updateSliderThresholdValue(this.value)" onchange="runAnalysisPipeline()" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500">
                 </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4 space-y-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">⚡ Engine Quick Actions Matrix</label>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="quickActionClearLogs()" class="bg-red-950 border border-red-900/60 hover:bg-red-900 text-red-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    🗑️ Flush Session Ledger Audit Logs
+                </button>
+                <button onclick="quickActionSimulateHighRisk()" class="bg-amber-950 border border-amber-900/60 hover:bg-amber-900 text-amber-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    🚨 Force Trigger Peak Risk Parameters
+                </button>
+                <button onclick="quickActionResetDefaults()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    🔄 Restore Factory Baseline Profiles
+                </button>
             </div>
         </div>
     </div>
@@ -132,8 +148,9 @@
                     </select>
                 </div>
             </div>
+            
             <button id="pipelineSubmitBtn" onclick="runAnalysisPipeline()" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-slate-800 transition shadow-sm cursor-pointer text-sm flex justify-center items-center gap-2">
-                <span>Run Model Pipeline</span>
+                <span id="btnText">Run Model Pipeline</span>
             </button>
         </div>
 
@@ -254,22 +271,6 @@
                         <li><b>Systemic Damage:</b> Jaundice (yellow eyes/skin) or an absolute inability to retain fluids.</li>
                     </ul>
                 </div>
-                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-xs space-y-2">
-                    <h4 class="text-slate-900 font-bold text-base">🏠 Personal & Household Vector Interventions</h4>
-                    <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1.5">
-                        <li><b>Long-Lasting Insecticidal Nets (LLINs):</b> Sleep consistently under treated netting.</li>
-                        <li><b>Indoor Residual Spraying (IRS):</b> Periodically treat inner structural walls with approved formulas.</li>
-                        <li><b>Topical Blockers:</b> Apply insect repellents during peak vector activity horizons.</li>
-                    </ul>
-                </div>
-                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-xs space-y-2">
-                    <h4 class="text-slate-900 font-bold text-base">🚜 Structural Environmental Mitigation Options</h4>
-                    <ul class="list-disc pl-5 text-sm text-slate-600 space-y-1.5">
-                        <li><b>Source Drainage Layouts:</b> Fill or drain surface puddles, open tracks, and breeding pits.</li>
-                        <li><b>Biological Mosquito Larviciding:</b> Introduce specific larvicide elements into static open waters.</li>
-                        <li><b>Clear Perimeter Growth:</b> Keep grass and brush short around residential perimeters.</li>
-                    </ul>
-                </div>
             </div>
 
         </div>
@@ -279,7 +280,7 @@
         let chartInstance = null;
         let activeDataCache = null;
         let sessionLogs = [];
-        let globalThresholdValue = 25;
+        let globalThresholdValue = 60; // DEFAULT THRESHOLD INITIALIZED AT 60%
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -318,23 +319,45 @@
             card.classList.toggle('hidden');
         }
 
-        // MOCK API CALL TO SIMULATE LOCAL CLIMATE BACKEND
+        /* ENGINE QUICK ACTIONS MATRIX IMPLEMENTATION */
+        function quickActionClearLogs() {
+            sessionLogs = [];
+            updateAuditTableUI();
+            alert("Engine Alert: Session analytics cache logs flushed successfully.");
+        }
+
+        function quickActionSimulateHighRisk() {
+            document.getElementById('monthInput').value = "5"; // May usually defaults high rain simulation
+            document.getElementById('districtInput').value = "Soroti Hotspot, Uganda";
+            runAnalysisPipeline();
+        }
+
+        function quickActionResetDefaults() {
+            document.getElementById('outbreakRiskSlider').value = 60;
+            updateSliderThresholdValue(60);
+            document.getElementById('districtInput').value = "Soroti, Uganda";
+            document.getElementById('monthInput').value = "6";
+            document.getElementById('riskSensitivityOverride').value = "standard";
+            runAnalysisPipeline();
+        }
+
+        // MOCK BACKEND DATA PIPELINE MODEL
         async function mockFetchAnalyze(payload) {
-            await new Promise(resolve => setTimeout(resolve, 800)); // Delay
-            const baseRain = payload.month >= 4 && payload.month <= 6 ? 6.80 : 1.40;
-            const tempVal = payload.month >= 6 && payload.month <= 8 ? 84.5 : 89.2;
-            const humidityVal = payload.month >= 4 && payload.month <= 10 ? 86.4 : 55.2;
+            await new Promise(resolve => setTimeout(resolve, 1400)); // Visible latency simulation
+            let baseRain = payload.month >= 4 && payload.month <= 6 ? 7.15 : 1.80;
+            let tempVal = 87.4;
+            let humidityVal = 84.5;
             
-            // Build pseudo DataFrame structure matching your API shape
             let dataframe = [];
             for(let d = 1; d <= 5; d++) {
-                let dailyRisk = Math.round((baseRain * 4.5) + (humidityVal * 0.2) + (d * 1.5));
-                if (payload.district.toLowerCase().includes("soroti")) dailyRisk += 8; // Localized risk bump
+                // Generate relative risk indices
+                let dailyRisk = Math.round((baseRain * 5.2) + (humidityVal * 0.15) + (d * 2.5));
+                if (payload.district.toLowerCase().includes("hotspot")) dailyRisk += 25; 
                 dataframe.push({
                     Date: `2026-${String(payload.month).padStart(2,'0')}-${String(d*6).padStart(2,'0')}`,
-                    Temperature: Math.round(tempVal + (d*0.4)),
-                    Humidity: Math.round(humidityVal - (d*0.5)),
-                    Accumulated_Rain: baseRain + (d * 0.25),
+                    Temperature: Math.round(tempVal + (d * 0.3)),
+                    Humidity: Math.round(humidityVal - (d * 0.4)),
+                    Accumulated_Rain: baseRain + (d * 0.15),
                     Outbreak_Risk_Percent: Math.min(dailyRisk, 100)
                 });
             }
@@ -344,8 +367,8 @@
             return {
                 ok: true,
                 json: async () => ({
-                    location: { address: payload.district, lat: 1.7190, lon: 33.6140, elevation: 1134.5 },
-                    metadata: { data_source_mode: "Satellite Sub-Seasonal Baseline Synthesis", target_period: `${payload.year}-${payload.month}` },
+                    location: { address: payload.district, lat: 1.7879, lon: 33.5007, elevation: 1173.18 },
+                    metadata: { data_source_mode: "Historical Satellite Calibration Engine", target_period: `${payload.year}-${payload.month}` },
                     assessment: {
                         summary_metrics: { Temperature: tempVal, Humidity: humidityVal, Accumulated_Rain: baseRain },
                         max_future_risk: maxFutureRisk
@@ -368,7 +391,14 @@
             const alertBox = document.getElementById('statusAlertBox');
             const statusBadge = document.getElementById('riskStatusBadge');
             
+            // ENABLE LOADING STATES ACROSS COMPONENT LAYERS
             btn.disabled = true;
+            btn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Processing Horizons...</span>`;
             
             document.getElementById('mTemp').className = "text-3xl font-bold text-slate-300 loading-skeleton";
             document.getElementById('mHumidity').className = "text-3xl font-bold text-slate-300 loading-skeleton";
@@ -376,23 +406,22 @@
             document.getElementById('mAlt').className = "text-3xl font-bold text-slate-300 loading-skeleton";
 
             alertBox.className = "p-5 rounded-2xl border bg-slate-100 border-slate-300 text-slate-600 loading-skeleton";
-            alertBox.innerHTML = `<h4 class="font-bold text-lg">⚡ SYNCHRONIZING WITH SUB-SEASONAL HORIZON PIPELINE</h4><p class="mt-1 text-sm">Extracting satellite maps and localized risk telemetry...</p>`;
+            alertBox.innerHTML = `<h4 class="font-bold text-lg">⚡ SYNCHRONIZING WITH SUB-SEASONAL HORIZON PIPELINE</h4><p class="mt-1 text-sm">Extracting satellite tracking maps and localized computational indicators...</p>`;
 
             try {
-                // Production line switchable to standard /api/analyze route
                 const response = await mockFetchAnalyze({ district, year, month });
                 const data = await response.json();
 
                 activeDataCache = data;
 
-                // Adjust threshold criteria based on settings override selection
+                // Adjust sliding boundaries relative to custom standard threshold rules
                 let computedThreshold = globalThresholdValue;
-                if (sensitivity === 'strict') computedThreshold = Math.max(10, computedThreshold - 10); 
+                if (sensitivity === 'strict') computedThreshold = Math.max(10, computedThreshold - 12); 
 
                 const maxRisk = data.assessment.max_future_risk;
-                const isHighRisk = maxRisk >= computedThreshold;
+                const isHighRisk = maxRisk >= computedThreshold; // ABOVE 60% HIGH RISK / BELOW 60% LOW RISK
 
-                // Record into historical tracking logs
+                // Append search item history array
                 sessionLogs.push({
                     time: new Date().toLocaleTimeString(),
                     target: district,
@@ -401,12 +430,12 @@
                 });
                 updateAuditTableUI();
 
-                // Populate Header Attributes
+                // Hydrate Global Header Panels
                 document.getElementById('verifiedAddress').innerText = data.location.address;
                 document.getElementById('dataSourceMode').innerText = data.metadata.data_source_mode;
                 document.getElementById('targetPeriodLabel').innerText = `${monthLabel} ${year}`;
                 
-                // Remove Loading Skeletons
+                // Tear down skeleton elements
                 document.getElementById('geoPins').innerText = `Spatial Grid Pins: Latitude ${data.location.lat.toFixed(4)} | Longitude ${data.location.lon.toFixed(4)}`;
                 document.getElementById('mTemp').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mTemp').innerText = `${data.assessment.summary_metrics.Temperature} °F`;
@@ -415,27 +444,25 @@
                 document.getElementById('mRain').className = "text-3xl font-bold text-slate-900";
                 document.getElementById('mRain').innerText = `${data.assessment.summary_metrics.Accumulated_Rain.toFixed(2)} In`;
                 document.getElementById('mAlt').className = "text-3xl font-bold text-slate-900";
-                document.getElementById('mAlt').innerText = `${data.location.elevation.toFixed(3)} m`;
+                document.getElementById('mAlt').innerText = `${data.location.elevation.toFixed(2)} m`;
 
                 alertBox.classList.remove('loading-skeleton');
                 
-                // Evaluate thresholds dynamically & output relevant explanations
                 if (isHighRisk) {
                     statusBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-full bg-red-100 text-red-700 animate-pulse";
                     statusBadge.innerText = "🚨 High Transmission Risk";
 
                     alertBox.className = "p-5 rounded-2xl border bg-red-50 border-red-200 text-red-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION ALERT</h4><p class="mt-1 text-sm">Long-range projections indicate that climate indicators cross the set evaluation criteria baseline limit (${computedThreshold}%), hitting a peak profile of <b>${maxRisk}% Risk Index</b>.</p>`;
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-red-700">🚨 CRITICAL OUTBREAK PREDICTION WARNING</h4><p class="mt-1 text-sm">Long-range projections indicate that climate trends for <b>${monthLabel} ${year}</b> cross your monitored threshold boundary criteria (${computedThreshold}%), hitting an active risk profile of <b>${maxRisk}% Vector Affinity Match</b>.</p>`;
                 } else {
                     statusBadge.className = "px-3 py-1 text-xs font-bold uppercase rounded-full bg-emerald-100 text-emerald-700";
                     statusBadge.innerText = "✅ Low Transmission Risk";
 
                     alertBox.className = "p-5 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900";
-                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ STABLE ENVIRONMENTAL BASIN PATHWAY</h4><p class="mt-1 text-sm">Projections state climate parameters remain contained inside acceptable thresholds (${computedThreshold}%), maintaining an estimated risk peak profile of <b>${maxRisk}% Vector Affinity</b>.</p>`;
+                    alertBox.innerHTML = `<h4 class="font-bold text-lg text-emerald-700">✅ CONTROLLED ECOSYSTEM PATHWAY</h4><p class="mt-1 text-sm">Projections state that climate boundaries for <b>${monthLabel} ${year}</b> will remain safe, tracking below your configured alert point boundaries (<b>${maxRisk}% Max Vector Index vs ${computedThreshold}% Threshold</b>).</p>`;
                 }
 
-                // Hydrate analytical explanations layout dynamically
-                generateDynamicExplanations(data.assessment.summary_metrics, data.location, computedThreshold, maxRisk);
+                generateExplanatoryReasons(data.assessment.summary_metrics, data.location, computedThreshold, maxRisk);
                 buildLedgerTable(data.horizon_dataframe);
                 renderHorizonChart(data.horizon_dataframe, isHighRisk);
 
@@ -443,53 +470,39 @@
                 alertBox.className = "p-5 rounded-2xl border bg-red-100 border-red-300 text-red-900";
                 alertBox.innerHTML = `<h4 class="font-bold text-lg">❌ Pipeline Execution Timeout</h4><p class="mt-1 text-sm">${err.message}</p>`;
             } finally {
+                // RESET TO STANDARD STABLE ACTION BUTTON DISPLAY
                 btn.disabled = false;
+                btn.innerHTML = `<span>Run Model Pipeline</span>`;
             }
         }
 
-        function generateDynamicExplanations(metrics, location, threshold, maxRisk) {
+        function generateExplanatoryReasons(metrics, location, threshold, maxRisk) {
             const container = document.getElementById('reasoningContainer');
             let contentHtml = '';
 
-            // Explanatory Factor 1: Rainfall Accumulation & Standing Pool Formation
-            if (metrics.Accumulated_Rain > 4.0) {
+            if (metrics.Accumulated_Rain > 4.5) {
                 contentHtml += `<div class="py-2.5">
-                    <span class="font-semibold text-red-600">🌧️ High Precipitation Vector Pool Accumulation:</span> 
-                    Accumulated rainfall of <b>${metrics.Accumulated_Rain.toFixed(2)} In</b> exceeds the runoff drainage ceiling capacity. Accelerated puddle development across regional clay horizons establishes pristine stagnant breeding habitats for <i>Anopheles</i> larvae vectors.
+                    <span class="font-semibold text-red-600">🌧️ High Precipitation Puddle Proliferation:</span> 
+                    Sustained precipitation of <b>${metrics.Accumulated_Rain.toFixed(2)} In</b> generates structural water log pooling around local sub-counties, establishing major pooling grounds for larvae development layers.
                 </div>`;
             } else {
                 contentHtml += `<div class="py-2.5">
-                    <span class="font-semibold text-emerald-600">☀️ Low Hydrographic Incubation Potential:</span> 
-                    Limited rainfall levels (<b>${metrics.Accumulated_Rain.toFixed(2)} In</b>) restrict widespread surface structural water logging, reducing vector breeding expansion boundaries.
+                    <span class="font-semibold text-emerald-600">☀️ Low Hydrographic Breeding Incubation:</span> 
+                    Calculated rain curves (<b>${metrics.Accumulated_Rain.toFixed(2)} In</b>) remain below containment profiles, yielding high soil moisture vaporization loops rather than pooling footprints.
                 </div>`;
             }
 
-            // Explanatory Factor 2: Thermal Incubation Profiles
-            if (metrics.Temperature >= 82 && metrics.Temperature <= 90) {
+            if (maxRisk >= threshold) {
                 contentHtml += `<div class="py-2.5">
-                    <span class="font-semibold text-red-600">🌡️ Optimized Parasite Incubation (Sporogonic Cycle):</span> 
-                    Regional mean temperature of <b>${metrics.Temperature}°F</b> hits the perfect vector breeding metabolic sweet spot. This high profile environment dramatically accelerates the lifecycle development speed of the <i>Plasmodium</i> parasite inside mosquitoes.
+                    <span class="font-semibold text-red-600">📊 Threshold Limit Breach:</span> 
+                    The evaluated spatial grid risk factor of <b>${maxRisk}%</b> breaks past your designated engine configuration setting of <b>${threshold}%</b>. Targeted application of indoor residual spraying is highly advised.
                 </div>`;
             } else {
                 contentHtml += `<div class="py-2.5">
-                    <span class="font-semibold text-slate-600">🌡️ Sub-optimal Extrinsic Cycle Range:</span> 
-                    Temperature tracking metrics remain outside peak incubation profiles, causing a natural mathematical decline in active biting velocity parameters.
+                    <span class="font-semibold text-emerald-600">🛡️ Contained Transmission Horizons:</span> 
+                    Vector affinity limits track significantly beneath your set safety margin index of <b>${threshold}%</b>. Outbreak probabilities match baseline profiles.
                 </div>`;
             }
-
-            // Explanatory Factor 3: Topographic Altitude Boundary Checks
-            if (location.elevation < 1300) {
-                contentHtml += `<div class="py-2.5">
-                    <span class="font-semibold text-amber-600">⛰️ Low Elevation Highland Barrier Exemption:</span> 
-                    The localized tracker site sits at an altitude of <b>${location.elevation.toFixed(1)} m</b>. Sitting below the 1300m highland vector control ceiling means thermal profiles remain uninhibited by cold high-altitude mountain winds.
-                </div>`;
-            }
-
-            // Explanatory Factor 4: User Specified Engine Threshold Interception
-            contentHtml += `<div class="py-2.5 bg-slate-50 p-3 rounded-lg border border-slate-100 mt-2">
-                ℹ️ <b>Threshold Decision Summary:</b> Outbreak risk metrics evaluated out to a total of <b>${maxRisk}%</b> relative to your selected pipeline parameter configuration limits of <b>${threshold}%</b>. 
-                ${maxRisk >= threshold ? 'Immediate deployment of larviciding and regional LLIN distributions is highly recommended.' : 'Current clinical control inventory distributions are adequate for this seasonal frame.'}
-            </div>`;
 
             container.innerHTML = contentHtml;
         }
@@ -537,12 +550,16 @@
 
         function updateAuditTableUI() {
             const tbody = document.getElementById('auditTableBody');
+            if(sessionLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td></tr>`;
+                return;
+            }
             tbody.innerHTML = sessionLogs.map(log => `
                 <tr class="hover:bg-slate-50">
                     <td class="p-2.5 font-medium text-slate-500">${log.time}</td>
                     <td class="p-2.5 font-bold">${log.target}</td>
                     <td class="p-2.5">${log.window}</td>
-                    <td class="p-2.5 font-extrabold ${log.risk >= globalThresholdValue ? 'text-red-600' : 'text-slate-900'}">${log.risk}%</td>
+                    <td class="p-2.5 font-extrabold ${log.risk >= globalThresholdValue ? 'text-red-600':'text-slate-900'}">${log.risk}%</td>
                 </tr>
             `).reverse().join('');
         }
@@ -550,12 +567,11 @@
         function downloadReport() {
             if (!activeDataCache) return alert("Please execute a telemetry pipeline run first.");
             const res = activeDataCache;
-            const summaryText = `MALARIA OUTBREAK LONG-RANGE INTELLIGENCE REPORT\n==============================================\nGenerated On: ${new Date().toLocaleString()}\nTarget Site: ${res.location.address}\nMax Projected Risk Index: ${res.assessment.max_future_risk}%\nPipeline Sourcing Profile: ${res.metadata.data_source_mode}\n==============================================`;
-            
+            const summaryText = `MALARIA OUTBREAK REPORT\n==================\nSite: ${res.location.address}\nMax Risk Calculated: ${res.assessment.max_future_risk}%`;
             const blob = new Blob([summaryText], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `Malaria_Outbreak_Report_${res.metadata.target_period}.txt`;
+            link.download = `Malaria_Report.txt`;
             link.click();
         }
 
