@@ -1,4 +1,192 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaria Outbreak Intelligence Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">Malaria Outbreak Intelligence Engine</h1>
+                    <p class="text-xs text-slate-500">Epidemiological Vector Modeling & Telemetry Engine</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-2 border-b border-slate-200">
+                <button data-tab-target="analyticsPanel" class="active px-4 py-2 text-sm font-medium border-b-2 border-emerald-600 text-emerald-600 transition flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-4 h-4"></i> Analytics
+                </button>
+                <button data-tab-target="auditPanel" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4"></i> Audit Log
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+
+        <!-- ANALYTICS TAB PANEL -->
+        <div id="analyticsPanel" class="tab-panel space-y-6">
+            
+            <!-- Controls Grid: Telemetry Form & Threshold Slider -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Inputs -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i> Query Controls
+                    </h2>
+                    <form id="telemetryForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Location Zone</label>
+                            <input type="text" id="locationInput" value="Soroti, Uganda" required 
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Time Horizon</label>
+                            <select id="windowInput" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="14_days" selected>14-Day Predictive Window</option>
+                                <option value="30_days">30-Day Sub-Seasonal Window</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                            <i data-lucide="play" class="w-4 h-4"></i> Run Pipeline
+                        </button>
+                    </form>
+                    <div id="loadingSpinner" class="hidden mt-3 text-xs text-amber-600 flex items-center gap-2">
+                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Executing vector telemetry calculations...
+                    </div>
+                </div>
+
+                <!-- Alert Threshold Adjustment -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alert Threshold Limit</label>
+                            <span id="thresholdDisplay" class="text-sm font-mono font-bold text-emerald-600">65%</span>
+                        </div>
+                        <input type="range" id="thresholdSlider" min="10" max="90" value="65" step="1" 
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        <p class="text-xs text-slate-400 mt-2">Adjust threshold to trigger interactive bound breach checks across current dataset.</p>
+                    </div>
+                    <button onclick="downloadReport()" class="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2 transition">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Export Summary Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header & Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Target Region</p>
+                    <p id="locationHeader" class="text-lg font-bold text-slate-900 mt-1 truncate">Soroti, Uganda</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Peak Risk Index</p>
+                    <p id="riskBadge" class="text-2xl font-black text-emerald-600 mt-1">--%</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Mean Temperature</p>
+                    <p id="metricTemp" class="text-2xl font-bold text-amber-500 mt-1">--</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Humidity / Rain Load</p>
+                    <div class="flex items-baseline space-x-2 mt-1">
+                        <span id="metricHum" class="text-lg font-bold text-cyan-600">--</span>
+                        <span class="text-slate-300">|</span>
+                        <span id="metricRain" class="text-lg font-bold text-blue-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explanatory Reason Breakdown Container -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Epidemiological Assessment & Reason Matrix</h3>
+                <div id="explanatoryReasonsContainer" class="text-sm text-slate-600">
+                    <p class="text-slate-400 italic text-xs">Run analysis to process bound breaches and environmental vector drivers.</p>
+                </div>
+            </div>
+
+            <!-- Chart.js Trend Visualizer -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-4 h-4 text-emerald-600"></i> Outbreak Risk Horizon Curve
+                </h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="horizonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i> Detailed Predictive Ledger
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-50 text-slate-500 font-mono uppercase">
+                            <tr>
+                                <th class="p-3.5">Date</th>
+                                <th class="p-3.5">Temperature</th>
+                                <th class="p-3.5">Humidity</th>
+                                <th class="p-3.5">Accumulated Rain</th>
+                                <th class="p-3.5">Vector Risk Index</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody">
+                            <tr>
+                                <td colspan="5" class="p-4 text-center text-slate-400">No trend rows returned from telemetry pipeline.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUDIT LOG TAB PANEL -->
+        <div id="auditPanel" class="tab-panel hidden bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-emerald-600"></i> Telemetry Query Audit History
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-slate-50 text-slate-500 font-mono uppercase">
+                        <tr>
+                            <th class="p-2.5">Time</th>
+                            <th class="p-2.5">Target Location</th>
+                            <th class="p-2.5">Time Horizon</th>
+                            <th class="p-2.5">Max Risk Returned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Paste Script Here -->
+    <script>
         // ==========================================
         // 1. GLOBAL STATE & CONFIGURATION
         // ==========================================
@@ -16,6 +204,7 @@
         // 2. INITIALIZATION & EVENT LISTENERS
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
             setupTabNavigation();
             setupThresholdSlider();
             
@@ -110,7 +299,7 @@
             } catch (error) {
                 console.error("Telemetry Pipeline Failure:", error);
                 showErrorMessage(`Pipeline Connection Error: ${error.message}. Verify that your Python backend server is running.`);
-            } finally {
+            } font-medium {
                 if (loadingSpinner) loadingSpinner.classList.add('hidden');
             }
         }
@@ -170,13 +359,13 @@
 
             if (maxRisk >= threshold) {
                 contentHtml += `
-                <div class="py-2.5 text-slate-700">
+                <div class="py-2 text-slate-700">
                     <span class="font-semibold text-red-600">📊 Bound Boundary Breach:</span> 
                     Calculated transmission vector peak of <b>${maxRisk.toFixed(1)}%</b> exceeds your alert boundary set at <b>${threshold}%</b>.
                 </div>`;
             } else {
                 contentHtml += `
-                <div class="py-2.5 text-slate-700">
+                <div class="py-2 text-slate-700">
                     <span class="font-semibold text-emerald-600">🛡️ Safe Operational Margin:</span> 
                     Transmission risk indices remain below the active trigger threshold of <b>${threshold}%</b>.
                 </div>`;
@@ -204,7 +393,7 @@
                 return;
             }
 
-            // Normalizes keys to match Pandas DataFrame outputs (.to_dict(orient='records'))
+            // Normalizes keys to match Pandas DataFrame outputs
             tbody.innerHTML = dataframe.map(row => {
                 const dateVal = row.date || row.Date || row.time || '--';
                 const tempVal = row.temperature ?? row.Temperature ?? null;
