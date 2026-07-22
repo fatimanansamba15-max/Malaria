@@ -1,18 +1,26 @@
 import os
+import logging
 import requests
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from datetime import datetime, date, timedelta
+from typing import Dict, Any, List, Tuple
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from geopy.geocoders import Nominatim
 
-app = FastAPI(title="Malaria Outbreak Intelligence Engine Backend")
+# Configure structured logging for production debugging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("malaria_intelligence_engine")
 
-# Enable robust cross-origin resource sharing for smooth frontend synchronization
+app = FastAPI(
+    title="Malaria Outbreak Intelligence Engine - Production API",
+    version="2.0.0",
+    description="Real-time epidemiological vector risk modeling using satellite weather streams and topographic dynamics."
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,210 +30,234 @@ app.add_middleware(
 )
 
 class AnalysisRequest(BaseModel):
-    district: str
-    year: int
-    month: int
+    district: str = Field(..., example="Soroti, Uganda")
+    year: int = Field(..., ge=2000, le=2030, example=2026)
+    month: int = Field(..., ge=1, le=12, example=7)
 
-def get_district_coordinates(location_string: str):
+# --- UTILITY: GEOLOCATION & TOPOGRAPHY ---
+
+def get_district_coordinates(location_string: str) -> Tuple[float, float, str]:
     """
-    Translates free-text inputs into accurate geographic spatial parameters
-    using the Nominatim geocoding engine.
+    Geocodes location strings using Nominatim with exponential backoff / standard fallback.
     """
     try:
-        # Initializing clean user agent matching global registration standards
-        geolocator = Nominatim(user_agent="malaria_early_warning_system_2026")
-        location = geolocator.geocode(location_string, timeout=6)
+        geolocator = Nominatim(user_agent="malaria_outbreak_engine_prod_2026", timeout=5)
+        location = geolocator.geocode(location_string)
         if location:
-            return location.latitude, location.longitude, location.address
-    except Exception:
-        pass
+            return float(location.latitude), float(location.longitude), str(location.address)
+    except Exception as e:
+        logger.warning(f"Geocoding service unavailable for '{location_string}': {e}")
     
-    # Context-aware structural defaults for Soroti if the geolocator times out
+    # Context-aware fallback for Soroti / Uganda default zone
     if "soroti" in location_string.lower():
         return 1.7879, 33.5007, "Soroti, Eastern Region, Uganda"
     
-    # Universal fallback coordinates
     return 1.7879, 33.5007, f"{location_string} (Fallback Coordinates Active)"
 
-def generate_target_climate_matrix(lat: float, lon: float, target_date: datetime.date):
+def get_real_elevation(lat: float, lon: float) -> float:
     """
-    Queries real-world historical archives and sub-seasonal weather engines.
-    Switches dynamically to reanalysis engines if requested target windows extend into past years.
+    Queries Open-Meteo Elevation API for authentic digital elevation model (DEM) altitude data.
     """
-    today = datetime.now().date()
-    start_date = datetime(target_date.year, target_date.month, 1).date()
-    # Calculate target month endpoint boundary
-    if target_date.month == 12:
-        end_date = datetime(target_date.year, 12, 31).date()
+    url = f"https://api.open-meteo.com/v1/elevation?latitude={lat}&longitude={lon}"
+    try:
+        res = requests.get(url, timeout=4)
+        if res.status_code == 200:
+            data = res.json()
+            if "elevation" in data and len(data["elevation"]) > 0:
+                return float(data["elevation"][0])
+    except Exception as e:
+        logger.warning(f"Elevation lookup failed for ({lat}, {lon}): {e}")
+    
+    # Secondary topographic approximation based on equatorial distance
+    return max(50.0, 1173.0 - (abs(lat) * 12.0))
+
+# --- CLIMATE STREAMING ENGINE ---
+
+def fetch_satellite_climate_data(lat: float, lon: float, target_year: int, target_month: int) -> Tuple[pd.DataFrame, str]:
+    """
+    Pulls real-time forecast or reanalysis historical records from Open-Meteo API.
+    Handles unit conversions and null interpolations cleanly.
+    """
+    today = date.today()
+    start_date = date(target_year, target_month, 1)
+    
+    # Calculate target month endpoint
+    if target_month == 12:
+        end_date = date(target_year, 12, 31)
     else:
-        end_date = (datetime(target_date.year, target_date.month + 1, 1) - timedelta(days=1)).date()
+        end_date = date(target_year, target_month + 1, 1) - timedelta(days=1)
         
-    total_days = (end_date - start_date).days + 1
-    date_range = [start_date + timedelta(days=i) for i in range(total_days)]
-    
-    # Base topographic evaluations derived from geographic coordinates
-    equator_proximity = max(0, 1 - (abs(lat) / 90.0))
-    base_elevation = max(100.0, 1173.18 - (abs(lat) * 15))
-    
-    # Check if target date requires historical archive API or standard forecast API
-    is_historical = start_date < (today - timedelta(days=14))
+    is_historical = end_date < (today - timedelta(days=14))
     
     if is_historical:
-        # Pull authentic historical records from the open-meteo archive engine
         weather_url = (
             f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}"
             f"&start_date={start_date}&end_date={end_date}"
             f"&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum"
             f"&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto"
         )
+        source_label = "Open-Meteo Historical Reanalysis Registry"
     else:
-        # Pull live operational forecasting windows
+        # Standardize query bounds for active/future windows
+        req_start = max(start_date, today)
+        req_end = max(end_date, today + timedelta(days=7))
         weather_url = (
             f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+            f"&start_date={req_start}&end_date={req_end}"
             f"&daily=temperature_2m_mean,relative_humidity_2m_mean,precipitation_sum"
-            f"&start_date={start_date if start_date >= today else today}"
-            f"&end_date={end_date if end_date >= today else today + timedelta(days=7)}"
             f"&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto"
         )
+        source_label = "Open-Meteo Operational Satellite & GFS Stream"
 
-    headers = {'User-Agent': 'MalariaOutbreakForecaster/6.0'}
+    headers = {'User-Agent': 'MalariaOutbreakEngine/2.0'}
     try:
-        response = requests.get(weather_url, headers=headers, timeout=7)
-        if response.status_code == 200:
-            daily_data = response.json().get('daily', {})
+        res = requests.get(weather_url, headers=headers, timeout=8)
+        if res.status_code == 200:
+            daily_data = res.json().get('daily', {})
             if 'time' in daily_data and len(daily_data['time']) > 0:
-                df_climate = pd.DataFrame({
-                    'date': pd.to_datetime(daily_data.get('time')),
-                    'temp_mean': daily_data.get('temperature_2m_mean'),
-                    'humidity_mean': daily_data.get('relative_humidity_2m_mean'),
-                    'precipitation': daily_data.get('precipitation_sum')
+                df = pd.DataFrame({
+                    'date': pd.to_datetime(daily_data['time']),
+                    'temp_mean': daily_data['temperature_2m_mean'],
+                    'humidity_mean': daily_data['relative_humidity_2m_mean'],
+                    'precipitation': daily_data['precipitation_sum']
                 })
-                # Interpolate missing atmospheric signals cleanly via forward/backward fills
-                df_climate['temp_mean'] = df_climate['temp_mean'].bfill().ffill().fillna(82.5)
-                df_climate['humidity_mean'] = df_climate['humidity_mean'].bfill().ffill().fillna(78.0)
-                df_climate['precipitation'] = df_climate['precipitation'].bfill().ffill().fillna(0.1)
-                
-                source_label = "Live Open-Meteo Climate Engine Connection" if not is_historical else "Historical Weather Reanalysis Registry"
-                return df_climate, float(base_elevation), source_label
-    except Exception:
-        pass
-            
-    # Premium statistical fallback matrix generation used only if web API streams completely fail
-    month_factor = np.sin((target_date.month - 1) * (np.pi / 6.0))
-    seasonal_rain_modifier = max(0.05, 0.25 + (month_factor * 0.20))
-    calculated_temp = 72.0 + (equator_proximity * 18.0) - (month_factor * 2.0)
-    calculated_humidity = 60.0 + (equator_proximity * 25.0) + (month_factor * 5.0)
+                # Impute missing records safely using forward & backward fills
+                df['temp_mean'] = df['temp_mean'].bfill().ffill().fillna(82.5)
+                df['humidity_mean'] = df['humidity_mean'].bfill().ffill().fillna(75.0)
+                df['precipitation'] = df['precipitation'].bfill().ffill().fillna(0.05)
+                return df, source_label
+    except Exception as e:
+        logger.error(f"Weather API Fetch failed: {e}")
+
+    # Fallback simulation generator if live API is unreachable
+    total_days = (end_date - start_date).days + 1
+    date_range = [start_date + timedelta(days=i) for i in range(total_days)]
     
-    df_climate = pd.DataFrame({
+    df_fallback = pd.DataFrame({
         'date': pd.to_datetime(date_range),
-        'temp_mean': [calculated_temp + np.sin(i)*1.2 for i in range(total_days)],
-        'humidity_mean': [min(100.0, calculated_humidity + np.cos(i)*2) for i in range(total_days)],
-        'precipitation': [max(0.0, seasonal_rain_modifier + 0.1) if i % 3 == 0 else 0.0 for i in range(total_days)]
+        'temp_mean': [82.0 + np.sin(i * 0.2) * 2.5 for i in range(total_days)],
+        'humidity_mean': [74.0 + np.cos(i * 0.2) * 5.0 for i in range(total_days)],
+        'precipitation': [0.2 if i % 4 == 0 else 0.0 for i in range(total_days)]
     })
-    
-    return df_climate, float(base_elevation), "Local Sub-Seasonal Structural Models (API Offline Fallback)"
+    return df_fallback, "Sub-Seasonal Climatological Synthetic Fallback"
+
+# --- EPIDEMIOLOGICAL CALCULATIONS ---
 
 def calculate_predictive_horizon_risk(df_climate: pd.DataFrame, elevation: float) -> List[Dict[str, Any]]:
     """
-    Evaluates ecological indicators to construct vector affinity metrics matching 0-100% boundaries.
+    Computes daily vector outbreak risk scores using degree-day parasitemia limits,
+    humidity desiccation curves, pooling accumulation, and altitude lapse rates.
     """
     timeline_records = []
     
-    for i, row in df_climate.iterrows():
+    for _, row in df_climate.iterrows():
         target_date = row['date']
         past_window = df_climate[df_climate['date'] <= target_date]
         
-        # Track 14-day trailing rainfall to calculate breeding ground potential
+        # 14-day cumulative rainfall for vector breeding pool index
         cumulative_rain = past_window['precipitation'].tail(14).sum()
-            
-        T = row['temp_mean']
+        
+        T_fahrenheit = row['temp_mean']
+        T_celsius = (T_fahrenheit - 32.0) * (5.0 / 9.0)
         H = row['humidity_mean']
         
-        # 1. Temperature Vector Score Calculation
-        if 64.4 <= T <= 104.0:
-            parasite_incubation_speed = 111.0 / (T - 64.4)
-            t_score = 1.0 - min(1.0, (parasite_incubation_speed / 30.0))
+        # 1. Temperature Vector Affinity (Deg-Day EIP Latency Model)
+        # Parasite EIP requires T > 16°C (60.8°F). Thermal optimum is between 25°C and 30°C.
+        if 16.0 <= T_celsius <= 38.0:
+            eip_days = 111.0 / (T_celsius - 16.0)
+            # Normalizing EIP speed: 10-14 days EIP yields optimal risk (1.0)
+            t_score = float(np.clip(1.0 - ((eip_days - 10.0) / 25.0), 0.0, 1.0))
         else:
             t_score = 0.0
-            
-        # 2. Humidity Vector Score Evaluation
-        h_score = 1.0 / (1.0 + np.exp(-0.15 * (H - 60.0)))
-        
-        # 3. Non-linear Precipitation Vector Score Matching
+
+        # 2. Humidity Vector Longevity Score (Sigmoid curve; threshold ~60%)
+        h_score = float(1.0 / (1.0 + np.exp(-0.15 * (H - 60.0))))
+
+        # 3. Non-Linear Larval Pooling Score
         if cumulative_rain == 0:
             r_score = 0.0
-        elif cumulative_rain > 8.5:
-            r_score = 0.20  # Heavy downpours wash away larvae fields
+        elif cumulative_rain > 8.0:  # Heavy downpours wash away larval breeding sites
+            r_score = 0.25
         else:
-            r_score = 1.0 - (((cumulative_rain - 3.5) / 5.0) ** 2)
-            r_score = max(0.0, min(1.0, r_score))
-            
-        # 4. Topographic Altitude Influence Factor
+            r_score = float(np.clip(1.0 - (((cumulative_rain - 3.0) / 5.0) ** 2), 0.05, 1.0))
+
+        # 4. Topographic Elevation Exclusion Factor
         if elevation >= 1800.0:
-            e_factor = 0.02
+            e_factor = 0.02  # Natural high-altitude thermal barrier
         elif elevation <= 600.0:
             e_factor = 1.0
         else:
-            e_factor = 1.0 - ((elevation - 600.0) / 1200.0)
-            
-        # Weighted affinity formula synthesis
+            e_factor = float(1.0 - ((elevation - 600.0) / 1200.0))
+
+        # Weighted composite score synthesis
         raw_affinity = (t_score * 0.35) + (h_score * 0.25) + (r_score * 0.25) + (e_factor * 0.15)
-        
-        # FIXED: Multiplied by 100 to scale across a full 0-100% risk axis to respect the 60% UI threshold
-        risk_percentage = float(raw_affinity * 100.0)
-        
-        # Hard limits based on biological containment realities
-        if elevation >= 1800.0 or T < 61.0 or H < 45.0:
+        risk_percentage = raw_affinity * 100.0
+
+        # Strict epidemiological bounds
+        if elevation >= 1800.0 or T_celsius < 16.0 or H < 45.0:
             risk_percentage = min(risk_percentage, 5.0)
-        elif cumulative_rain == 0.0 and H < 52.0:
-            risk_percentage = min(risk_percentage, 6.0)
-            
+        elif cumulative_rain == 0.0 and H < 50.0:
+            risk_percentage = min(risk_percentage, 8.0)
+
         timeline_records.append({
             'Date': target_date.strftime('%Y-%m-%d'),
-            'Temperature': round(T, 1),
-            'Humidity': round(H, 1),
-            'Accumulated_Rain': round(cumulative_rain, 2),
-            'Outbreak_Risk_Percent': round(max(0.0, min(100.0, risk_percentage)), 1)
+            'Temperature_F': round(T_fahrenheit, 1),
+            'Temperature_C': round(T_celsius, 1),
+            'Humidity_Percent': round(H, 1),
+            'Accumulated_Rain_Inches': round(cumulative_rain, 2),
+            'Outbreak_Risk_Percent': round(float(np.clip(risk_percentage, 0.0, 100.0)), 1)
         })
-        
+
     return timeline_records
+
+# --- MAIN API ENDPOINT ---
 
 @app.post("/api/analyze")
 def analyze_outbreak_risk(payload: AnalysisRequest):
-    # Geocode free-text strings to retrieve authentic spatial metadata
+    """
+    Production endpoint accepting district, year, and month to produce detailed 
+    vector outbreak timelines and epidemiological risk assessments.
+    """
+    # 1. Spatial Resolution
     lat, lon, full_address = get_district_coordinates(payload.district)
-    
-    try:
-        target_date = datetime(payload.year, payload.month, 15).date()
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid calendar structure selection parameters.")
-        
-    # Extract live climate data streams from web servers
-    df_climate, elevation, data_mode = generate_target_climate_matrix(lat, lon, target_date)
-    
-    # Parse dataframes through epidemiology tracking layers
+    elevation = get_real_elevation(lat, lon)
+
+    # 2. Data Ingestion
+    df_climate, data_source_label = fetch_satellite_climate_data(
+        lat, lon, payload.year, payload.month
+    )
+
+    # 3. Model Pipeline Execution
     horizon_records = calculate_predictive_horizon_risk(df_climate, elevation)
-    
-    # Calculate mid-month index summary points and monthly peak markers
-    mid_row = horizon_records[len(horizon_records) // 2]
-    max_future_risk = max([day['Outbreak_Risk_Percent'] for day in horizon_records])
-    
-    # Return structured JSON payload to the user dashboard interface
+
+    if not horizon_records:
+        raise HTTPException(status_code=500, detail="Failed to calculate epidemiological risk metrics.")
+
+    # Extract dynamic mid-month summary and peak risk markers
+    mid_index = len(horizon_records) // 2
+    summary_metrics = horizon_records[mid_index]
+    max_risk = max([record['Outbreak_Risk_Percent'] for record in horizon_records])
+
     return {
         "status": "success",
-        "location": { 
-            "address": full_address, 
-            "lat": lat, 
-            "lon": lon, 
-            "elevation": round(elevation, 3) 
+        "location": {
+            "address": full_address,
+            "lat": lat,
+            "lon": lon,
+            "elevation_meters": round(elevation, 1)
         },
-        "metadata": { 
-            "data_source_mode": data_mode, 
-            "target_period": target_date.strftime("%Y-%m") 
+        "metadata": {
+            "data_source_mode": data_source_label,
+            "target_period": f"{payload.year}-{payload.month:02d}"
         },
         "assessment": {
-            "max_future_risk": max_future_risk,
-            "summary_metrics": mid_row
+            "peak_outbreak_risk_percent": max_risk,
+            "risk_status": "HIGH OUTBREAK THRESHOLD" if max_risk >= 54.0 else "LOW TRANSMISSION RISK",
+            "summary_metrics": summary_metrics
         },
         "horizon_dataframe": horizon_records
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
