@@ -8,6 +8,7 @@ from typing import Dict, Any, List, Tuple
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from geopy.geocoders import Nominatim
 
@@ -31,8 +32,30 @@ app.add_middleware(
 
 class AnalysisRequest(BaseModel):
     district: str = Field(..., example="Soroti, Uganda")
-    year: int = Field(..., ge=2000, le=2030, example=2026)
-    month: int = Field(..., ge=1, le=12, example=7)
+    year: int = Field(default_factory=lambda: datetime.now().year, ge=2000, le=2030, example=2026)
+    month: int = Field(default_factory=lambda: datetime.now().month, ge=1, le=12, example=7)
+
+# --- ROUTE 1: SERVE DASHBOARD FRONTEND AT ROOT (/) ---
+
+@app.get("/", response_class=HTMLResponse)
+def read_root():
+    """
+    Serves the index.html file so Vercel renders your full UI 
+    instead of returning a raw JSON 404 or blank page.
+    """
+    # Primary check: index.html at root level when app runs inside /api directory
+    index_path = os.path.join(os.path.dirname(__file__), "..", "index.html")
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            return f.read()
+            
+    # Secondary check: index.html in current working directory
+    if os.path.exists("index.html"):
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+            
+    return "<h1 style='color:red;'>index.html not found in repository root. Ensure index.html is placed at the top level of your GitHub repo.</h1>"
+
 
 # --- UTILITY: GEOLOCATION & TOPOGRAPHY ---
 
@@ -54,6 +77,7 @@ def get_district_coordinates(location_string: str) -> Tuple[float, float, str]:
     
     return 1.7879, 33.5007, f"{location_string} (Fallback Coordinates Active)"
 
+
 def get_real_elevation(lat: float, lon: float) -> float:
     """
     Queries Open-Meteo Elevation API for authentic digital elevation model (DEM) altitude data.
@@ -70,6 +94,7 @@ def get_real_elevation(lat: float, lon: float) -> float:
     
     # Secondary topographic approximation based on equatorial distance
     return max(50.0, 1173.0 - (abs(lat) * 12.0))
+
 
 # --- CLIMATE STREAMING ENGINE ---
 
@@ -141,6 +166,7 @@ def fetch_satellite_climate_data(lat: float, lon: float, target_year: int, targe
     })
     return df_fallback, "Sub-Seasonal Climatological Synthetic Fallback"
 
+
 # --- EPIDEMIOLOGICAL CALCULATIONS ---
 
 def calculate_predictive_horizon_risk(df_climate: pd.DataFrame, elevation: float) -> List[Dict[str, Any]]:
@@ -162,34 +188,32 @@ def calculate_predictive_horizon_risk(df_climate: pd.DataFrame, elevation: float
         H = row['humidity_mean']
         
         # 1. Temperature Vector Affinity (Deg-Day EIP Latency Model)
-        # Parasite EIP requires T > 16°C (60.8°F). Thermal optimum is between 25°C and 30°C.
         if 16.0 <= T_celsius <= 38.0:
             eip_days = 111.0 / (T_celsius - 16.0)
-            # Normalizing EIP speed: 10-14 days EIP yields optimal risk (1.0)
             t_score = float(np.clip(1.0 - ((eip_days - 10.0) / 25.0), 0.0, 1.0))
         else:
             t_score = 0.0
 
-        # 2. Humidity Vector Longevity Score (Sigmoid curve; threshold ~60%)
+        # 2. Humidity Vector Longevity Score (Sigmoid curve)
         h_score = float(1.0 / (1.0 + np.exp(-0.15 * (H - 60.0))))
 
         # 3. Non-Linear Larval Pooling Score
         if cumulative_rain == 0:
             r_score = 0.0
-        elif cumulative_rain > 8.0:  # Heavy downpours wash away larval breeding sites
+        elif cumulative_rain > 8.0:
             r_score = 0.25
         else:
             r_score = float(np.clip(1.0 - (((cumulative_rain - 3.0) / 5.0) ** 2), 0.05, 1.0))
 
         # 4. Topographic Elevation Exclusion Factor
         if elevation >= 1800.0:
-            e_factor = 0.02  # Natural high-altitude thermal barrier
+            e_factor = 0.02
         elif elevation <= 600.0:
             e_factor = 1.0
         else:
             e_factor = float(1.0 - ((elevation - 600.0) / 1200.0))
 
-        # Weighted composite score synthesis
+        # Composite score synthesis
         raw_affinity = (t_score * 0.35) + (h_score * 0.25) + (r_score * 0.25) + (e_factor * 0.15)
         risk_percentage = raw_affinity * 100.0
 
@@ -209,6 +233,7 @@ def calculate_predictive_horizon_risk(df_climate: pd.DataFrame, elevation: float
         })
 
     return timeline_records
+
 
 # --- MAIN API ENDPOINT ---
 
