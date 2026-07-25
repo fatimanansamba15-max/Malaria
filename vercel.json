@@ -1,12 +1,568 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaria Outbreak Intelligence Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans antialiased">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">Malaria Outbreak Intelligence Engine</h1>
+                    <p class="text-xs text-slate-500">Epidemiological Vector Modeling & Telemetry Engine</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-2 border-b border-slate-200">
+                <button data-tab-target="analyticsPanel" class="active px-4 py-2 text-sm font-medium border-b-2 border-emerald-600 text-emerald-600 transition flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-4 h-4"></i> Analytics
+                </button>
+                <button data-tab-target="auditPanel" class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4"></i> Audit Log
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+
+        <!-- ANALYTICS TAB PANEL -->
+        <div id="analyticsPanel" class="tab-panel space-y-6">
+            
+            <!-- Controls Grid: Telemetry Form & Threshold Slider -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Inputs -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-emerald-600"></i> Query Controls
+                    </h2>
+                    <form id="telemetryForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Location Zone</label>
+                            <input type="text" id="locationInput" value="Soroti, Uganda" required 
+                                class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Time Horizon</label>
+                            <select id="windowInput" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="14_days" selected>14-Day Predictive Window</option>
+                                <option value="30_days">30-Day Sub-Seasonal Window</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                            <i data-lucide="play" class="w-4 h-4"></i> Run Pipeline
+                        </button>
+                    </form>
+                    <div id="loadingSpinner" class="hidden mt-3 text-xs text-amber-600 flex items-center gap-2">
+                        <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Executing vector telemetry calculations...
+                    </div>
+                </div>
+
+                <!-- Alert Threshold Adjustment -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alert Threshold Limit</label>
+                            <span id="thresholdDisplay" class="text-sm font-mono font-bold text-emerald-600">65%</span>
+                        </div>
+                        <input type="range" id="thresholdSlider" min="10" max="90" value="65" step="1" 
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                        <p class="text-xs text-slate-400 mt-2">Adjust threshold to trigger interactive bound breach checks across current dataset.</p>
+                    </div>
+                    <button onclick="downloadReport()" class="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-2 transition">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Export Summary Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header & Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Target Region</p>
+                    <p id="locationHeader" class="text-lg font-bold text-slate-900 mt-1 truncate">Soroti, Uganda</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Peak Risk Index</p>
+                    <p id="riskBadge" class="text-2xl font-black text-emerald-600 mt-1">--%</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Mean Temperature</p>
+                    <p id="metricTemp" class="text-2xl font-bold text-amber-500 mt-1">--</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-medium text-slate-500">Humidity / Rain Load</p>
+                    <div class="flex items-baseline space-x-2 mt-1">
+                        <span id="metricHum" class="text-lg font-bold text-cyan-600">--</span>
+                        <span class="text-slate-300">|</span>
+                        <span id="metricRain" class="text-lg font-bold text-blue-600">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explanatory Reason Breakdown Container -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Epidemiological Assessment & Reason Matrix</h3>
+                <div id="explanatoryReasonsContainer" class="text-sm text-slate-600">
+                    <p class="text-slate-400 italic text-xs">Run analysis to process bound breaches and environmental vector drivers.</p>
+                </div>
+            </div>
+
+            <!-- Chart.js Trend Visualizer -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i data-lucide="line-chart" class="w-4 h-4 text-emerald-600"></i> Outbreak Risk Horizon Curve
+                </h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="horizonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-emerald-600"></i> Detailed Predictive Ledger
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-50 text-slate-500 font-mono uppercase">
+                            <tr>
+                                <th class="p-3.5">Date</th>
+                                <th class="p-3.5">Temperature</th>
+                                <th class="p-3.5">Humidity</th>
+                                <th class="p-3.5">Accumulated Rain</th>
+                                <th class="p-3.5">Vector Risk Index</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody">
+                            <tr>
+                                <td colspan="5" class="p-4 text-center text-slate-400">No trend rows returned from telemetry pipeline.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUDIT LOG TAB PANEL -->
+        <div id="auditPanel" class="tab-panel hidden bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-emerald-600"></i> Telemetry Query Audit History
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-slate-50 text-slate-500 font-mono uppercase">
+                        <tr>
+                            <th class="p-2.5">Time</th>
+                            <th class="p-2.5">Target Location</th>
+                            <th class="p-2.5">Time Horizon</th>
+                            <th class="p-2.5">Max Risk Returned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody">
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Corrected JavaScript Engine -->
+    <script>
+        // ==========================================
+        // 1. GLOBAL STATE & CONFIGURATION
+        // ==========================================
+        let chartInstance = null;
+        let activeDataCache = null;
+        let globalThresholdValue = 65;
+        const sessionLogs = [];
+
+        const API_BASE_URL = window.location.origin.includes('http') 
+            ? window.location.origin 
+            : 'http://127.0.0.1:5000';
+
+        // ==========================================
+        // 2. INITIALIZATION & EVENT LISTENERS
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            setupTabNavigation();
+            setupThresholdSlider();
+            
+            const telemetryForm = document.getElementById('telemetryForm');
+            if (telemetryForm) {
+                telemetryForm.addEventListener('submit', handleFormSubmission);
+            }
+
+            // Run initial demo pipeline cycle on boot
+            runDemoPipeline();
+        });
+
+        function setupTabNavigation() {
+            const tabs = document.querySelectorAll('[data-tab-target]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-tab-target');
+                    
+                    tabs.forEach(t => {
+                        t.classList.remove('border-emerald-600', 'text-emerald-600', 'active');
+                        t.classList.add('border-transparent', 'text-slate-500');
+                    });
+                    tab.classList.add('border-emerald-600', 'text-emerald-600', 'active');
+
+                    document.querySelectorAll('.tab-panel').forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    const activePanel = document.getElementById(targetId);
+                    if (activePanel) activePanel.classList.remove('hidden');
+                });
+            });
+        }
+
+        function setupThresholdSlider() {
+            const slider = document.getElementById('thresholdSlider');
+            const display = document.getElementById('thresholdDisplay');
+            if (!slider) return;
+
+            slider.addEventListener('input', (e) => {
+                globalThresholdValue = parseFloat(e.target.value);
+                if (display) display.textContent = `${globalThresholdValue}%`;
+                
+                if (activeDataCache) {
+                    processTelemetryResponse(activeDataCache);
+                }
+            });
+        }
+
+        // ==========================================
+        // 3. PIPELINE & DATA HANDLING
+        // ==========================================
+        async function handleFormSubmission(event) {
+            if (event) event.preventDefault();
+
+            const locationInput = document.getElementById('locationInput')?.value || 'Soroti, Uganda';
+            const windowInput = document.getElementById('windowInput')?.value || '14_days';
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: locationInput,
+                        time_window: windowInput,
+                        threshold: globalThresholdValue
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server status ${response.status}`);
+                }
+
+                const data = await response.json();
+                activeDataCache = data;
+                recordAuditLog(data.location?.address || locationInput, windowInput, data.assessment?.max_future_risk ?? 0);
+                processTelemetryResponse(data);
+
+            } catch (error) {
+                console.warn("Backend API unavailable, executing local vector engine mode:", error);
+                // Fallback to local data processing
+                runDemoPipeline(locationInput, windowInput);
+            } finally {
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function runDemoPipeline(locName = "Soroti, Uganda", winName = "14_days") {
+            const days = winName === '30_days' ? 30 : 14;
+            const fakeDataframe = [];
+            let peakRisk = 0;
+
+            for (let i = 0; i < days; i++) {
+                const dateStr = new Date(Date.now() + i * 86400000).toISOString().split('T')[0];
+                const temp = 78 + Math.sin(i) * 5 + (Math.random() * 2);
+                const hum = 65 + Math.cos(i) * 15 + (Math.random() * 5);
+                const rain = Math.max(0, Math.sin(i * 0.8) * 0.8);
+                const risk = Math.min(100, Math.max(10, (temp * 0.3) + (hum * 0.4) + (rain * 25) - 20));
+
+                if (risk > peakRisk) peakRisk = risk;
+
+                fakeDataframe.push({
+                    date: dateStr,
+                    temperature: temp,
+                    humidity: hum,
+                    rain: rain,
+                    risk: risk
+                });
+            }
+
+            activeDataCache = {
+                location: { address: locName, lat: 1.715, lon: 33.611, elevation: 1120 },
+                assessment: {
+                    max_future_risk: peakRisk,
+                    summary_metrics: {
+                        Temperature: fakeDataframe.reduce((a, b) => a + b.temperature, 0) / days,
+                        Humidity: fakeDataframe.reduce((a, b) => a + b.humidity, 0) / days,
+                        Accumulated_Rain: fakeDataframe.reduce((a, b) => a + b.rain, 0)
+                    }
+                },
+                horizon_dataframe: fakeDataframe,
+                metadata: { data_source_mode: 'Client Telemetry Simulation', execution_timestamp: new Date().toISOString() }
+            };
+
+            recordAuditLog(locName, winName, peakRisk);
+            processTelemetryResponse(activeDataCache);
+        }
+
+        function recordAuditLog(target, win, risk) {
+            sessionLogs.unshift({
+                time: new Date().toLocaleTimeString(),
+                target: target,
+                window: win.replace('_', ' '),
+                risk: risk
+            });
+            updateAuditTableUI();
+        }
+
+        // ==========================================
+        // 4. UI RENDERERS
+        // ==========================================
+        function processTelemetryResponse(payload) {
+            if (!payload || !payload.assessment) return;
+
+            const assessment = payload.assessment;
+            const maxRisk = assessment.max_future_risk ?? 0;
+            const isHighRisk = maxRisk >= globalThresholdValue;
+
+            updateSummaryCards(payload);
+            generateExplanatoryReasons(assessment, globalThresholdValue);
+            buildLedgerTable(payload.horizon_dataframe || []);
+            renderHorizonChart(payload.horizon_dataframe || [], isHighRisk);
+        }
+
+        function updateSummaryCards(payload) {
+            const asm = payload.assessment || {};
+            const metrics = asm.summary_metrics || {};
+            const loc = payload.location || {};
+
+            const locationEl = document.getElementById('locationHeader');
+            const riskEl = document.getElementById('riskBadge');
+            const tempEl = document.getElementById('metricTemp');
+            const humEl = document.getElementById('metricHum');
+            const rainEl = document.getElementById('metricRain');
+
+            if (locationEl) locationEl.textContent = loc.address || 'Target Zone';
+            if (riskEl) {
+                riskEl.textContent = `${(asm.max_future_risk ?? 0).toFixed(1)}%`;
+                riskEl.className = `text-2xl font-black ${asm.max_future_risk >= globalThresholdValue ? 'text-red-600' : 'text-emerald-600'}`;
+            }
+            if (tempEl) tempEl.textContent = metrics.Temperature ? `${metrics.Temperature.toFixed(1)} °F` : '--';
+            if (humEl) humEl.textContent = metrics.Humidity ? `${metrics.Humidity.toFixed(1)} %` : '--';
+            if (rainEl) rainEl.textContent = metrics.Accumulated_Rain ? `${metrics.Accumulated_Rain.toFixed(2)} in` : '--';
+        }
+
+        function generateExplanatoryReasons(assessment, threshold) {
+            const container = document.getElementById('explanatoryReasonsContainer');
+            if (!container) return;
+
+            const maxRisk = assessment?.max_future_risk ?? 0;
+            const metrics = assessment?.summary_metrics || {};
+
+            let contentHtml = '';
+
+            if (maxRisk >= threshold) {
+                contentHtml += `
+                <div class="py-2 text-slate-700">
+                    <span class="font-semibold text-red-600">📊 Bound Boundary Breach:</span> 
+                    Calculated transmission vector peak of <b>${maxRisk.toFixed(1)}%</b> exceeds your alert boundary set at <b>${threshold}%</b>.
+                </div>`;
+            } else {
+                contentHtml += `
+                <div class="py-2 text-slate-700">
+                    <span class="font-semibold text-emerald-600">🛡️ Safe Operational Margin:</span> 
+                    Transmission risk indices remain below the active trigger threshold of <b>${threshold}%</b>.
+                </div>`;
+            }
+
+            if (metrics.Temperature) {
+                contentHtml += `
+                <div class="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100 space-y-1">
+                    <div>• Thermal Range Mean: <b>${metrics.Temperature.toFixed(1)}°F</b></div>
+                    <div>• Vector Relative Humidity: <b>${metrics.Humidity ? metrics.Humidity.toFixed(1) : '--'}% RH</b> | 
+                    Precipitation Load: <b>${metrics.Accumulated_Rain ? metrics.Accumulated_Rain.toFixed(2) : '0.00'} in</b></div>
+                </div>`;
+            }
+
+            container.innerHTML = contentHtml;
+        }
+
+        function buildLedgerTable(dataframe) {
+            const tbody = document.getElementById('ledgerTableBody');
+            if (!tbody) return;
+
+            if (!dataframe || !Array.isArray(dataframe) || dataframe.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No trend rows returned from telemetry pipeline.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = dataframe.map(row => {
+                const dateVal = row.date || row.Date || row.time || '--';
+                const tempVal = row.temperature ?? row.Temperature ?? null;
+                const humVal = row.humidity ?? row.Humidity ?? null;
+                const rainVal = row.rain ?? row.Rain ?? row.Accumulated_Rain ?? null;
+                const riskVal = row.risk ?? row.Risk ?? row.outbreak_risk ?? 0;
+
+                return `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-3.5 font-medium text-slate-800">${dateVal}</td>
+                    <td class="p-3.5 text-slate-600">${tempVal !== null ? Number(tempVal).toFixed(1) + '°' : '--'}</td>
+                    <td class="p-3.5 text-slate-600">${humVal !== null ? Number(humVal).toFixed(1) + '%' : '--'}</td>
+                    <td class="p-3.5 text-slate-600">${rainVal !== null ? Number(rainVal).toFixed(2) + ' in' : '--'}</td>
+                    <td class="p-3.5 font-bold ${riskVal >= globalThresholdValue ? 'text-red-600' : 'text-emerald-600'}">
+                        ${Number(riskVal).toFixed(1)}%
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderHorizonChart(dataframe, isHighRisk) {
+            const canvas = document.getElementById('horizonChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const labels = dataframe ? dataframe.map(d => d.date || d.Date || d.time || '') : [];
+            const riskData = dataframe ? dataframe.map(d => d.risk ?? d.Risk ?? d.outbreak_risk ?? 0) : [];
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Outbreak Risk Index (%)',
+                        data: riskData,
+                        borderColor: isHighRisk ? '#ef4444' : '#10b981',
+                        backgroundColor: isHighRisk ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` Risk Level: ${ctx.parsed.y.toFixed(1)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' } }
+                    }
+                }
+            });
+        }
+
+        function updateAuditTableUI() {
+            const tbody = document.getElementById('auditTableBody');
+            if (!tbody) return;
+
+            if (!sessionLogs || sessionLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">No telemetry session items cached.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sessionLogs.map(log => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs">
+                    <td class="p-2.5 font-mono text-slate-500">${log.time}</td>
+                    <td class="p-2.5 font-medium text-slate-800">${log.target}</td>
+                    <td class="p-2.5 text-slate-600">${log.window}</td>
+                    <td class="p-2.5 font-bold ${log.risk >= globalThresholdValue ? 'text-red-600' : 'text-emerald-600'}">
+                        ${Number(log.risk).toFixed(1)}%
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // 5. EXPORT & UTILITY FUNCTIONS
+        // ==========================================
+        function downloadReport() {
+            if (!activeDataCache) {
+                alert("Please execute an analysis request prior to exporting executive summaries.");
+                return;
+            }
+
+            const loc = activeDataCache.location || {};
+            const asm = activeDataCache.assessment || {};
+            const metrics = asm.summary_metrics || {};
+            const meta = activeDataCache.metadata || {};
+
+            const reportContent = `====================================================
+MALARIA OUTBREAK INTELLIGENCE ENGINE - EXECUTIVE REPORT
+====================================================
+Generated: ${new Date().toLocaleString()}
+Target Location: ${loc.address || 'N/A'}
+Coordinates: Lat ${loc.lat ?? 'N/A'}, Lon ${loc.lon ?? 'N/A'}
+
+ENVIRONMENTAL SUMMARY METRICS:
+----------------------------------------------------
+Average Temperature: ${metrics.Temperature ? metrics.Temperature.toFixed(1) + ' °F' : 'N/A'}
+Average Relative Humidity: ${metrics.Humidity ? metrics.Humidity.toFixed(1) + ' %' : 'N/A'}
+Accumulated Rain: ${metrics.Accumulated_Rain ? metrics.Accumulated_Rain.toFixed(2) + ' in' : 'N/A'}
+
+EPIDEMIOLOGICAL ASSESSMENT:
+----------------------------------------------------
+Peak Outbreak Risk Index: ${asm.max_future_risk ? asm.max_future_risk.toFixed(1) + '%' : 'N/A'}
+Alert Threshold Set: ${globalThresholdValue}%
+Status: ${(asm.max_future_risk ?? 0) >= globalThresholdValue ? 'HIGH TRANSMISSION RISK ALERT' : 'STABLE / LOW RISK'}
+
+DATA PIPELINE METADATA:
+----------------------------------------------------
+Data Source Mode: ${meta.data_source_mode || 'API Live Telemetry'}
+Pipeline Execution Time: ${meta.execution_timestamp || new Date().toISOString()}
+====================================================`;
+
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const safeName = (loc.address || 'Location').replace(/[^a-zA-Z0-9]/g, '_');
+            link.download = `Malaria_Risk_Report_${safeName}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
